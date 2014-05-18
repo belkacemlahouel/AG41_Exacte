@@ -3,8 +3,8 @@ CXX = g++
 # CCFLAGS = -Wall -Werror -ansi -pedantic -fPIC -Wextra -g
 
 TARGET   = challenge
-SRCFILES = main.cpp Probleme.cpp Client.cpp Produit.cpp
-HFILES   = Probleme.h Client.h Produit.h
+SRCFILES = main.cpp Probleme.cpp Produit.cpp Client.cpp Transport.cpp
+HFILES   = Probleme.h Client.h Produit.h Transport.h
 
 all:
 	$(CXX) $(CCFLAGS) $(SRCFILES) -o $(TARGET)

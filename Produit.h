@@ -1,18 +1,21 @@
 #ifndef __PRODUIT__
 #define __PRODUIT__
 
-#include <iostream>
-
-using namespace std;
+#include "Client.h"
 
 class Produit {
 	private:
 		int i;					// N° du job
-		int di;					// Date due du job i
-		int cli;				// Client qui demande le job i
+		int date;				// Date due du job i
+		int client;				// Client qui demande le job i
 
 	public:
-		Produit();
+		Produit(int, int, int);
+		int getDateDue();
+		int getNClient();
+		int getNProduit();
+		int coutStockage(int, Client*);
+
 };
 
 #endif // __PRODUIT__

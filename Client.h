@@ -1,17 +1,16 @@
 #ifndef __CLIENT__
 #define __CLIENT__
 
-#include <iostream>
-
-using namespace std;
-
 class Client {
 	private:
 		int h;				// N° du client
-		int betah;			// Coût de stockage unitaire chez le client h
+		int cout_u;			// Coût de stockage unitaire chez le client h
+		bool fini;			// Est-ce que le client a fini d'être livré ?
+		// Temps qu'on mets à arriver à ce client ?
 
 	public:
-		Client();
+		Client(int, int);
+		int getCoutUnitaireStockage();
 };
 
 #endif // __CLIENT__
