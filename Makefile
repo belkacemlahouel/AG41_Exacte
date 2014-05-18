@@ -1,10 +1,10 @@
 CXX = g++
-CCFLAGS = -Werror -Wall -O3
+# CCFLAGS = -Werror -Wall -O3
 # CCFLAGS = -Wall -Werror -ansi -pedantic -fPIC -Wextra -g
 
 TARGET   = challenge
-SRCFILES = main.cpp Probleme.cpp Client.cpp
-HFILES   = Probleme.h Client.h
+SRCFILES = main.cpp Probleme.cpp Client.cpp Produit.cpp
+HFILES   = Probleme.h Client.h Produit.h
 
 all:
 	$(CXX) $(CCFLAGS) $(SRCFILES) -o $(TARGET)
