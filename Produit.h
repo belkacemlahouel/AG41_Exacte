@@ -9,7 +9,10 @@ class Produit {
 	private:
 		int i;					// N° du job
 		int di;					// Date due du job i
-		
+		int cli;				// Client qui demande le job i
+
+	public:
+		Produit();
 };
 
 #endif // __PRODUIT__

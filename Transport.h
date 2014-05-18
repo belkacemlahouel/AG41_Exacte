@@ -12,7 +12,6 @@ class Transport {
 		int tij[][];	// Temps de transport entre le client i et j, 0..m
 		int eta;		// Coef pour le coût de transport
 
-
 	public:
 		Transport();
 };
