@@ -3,8 +3,8 @@ CCFLAGS = -Werror -Wall -O3
 # CCFLAGS = -Wall -Werror -ansi -pedantic -fPIC -Wextra -g
 
 TARGET   = challenge
-SRCFILES = main.cpp Probleme.cpp
-HFILES   = Probleme.h
+SRCFILES = main.cpp Probleme.cpp Client.cpp
+HFILES   = Probleme.h Client.h
 
 all:
 	$(CXX) $(CCFLAGS) $(SRCFILES) -o $(TARGET)
