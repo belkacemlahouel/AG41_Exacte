@@ -1,5 +1,37 @@
 #include "Probleme.h"
 
+/* Constructeur par défaut, n'est utilisé que pour tester le jeu d'essai fourni dans l'énoncé
+ * Note : ce jeu d'essai est en fait le jeu d'essai dans l'énoncé, mais tout est décalé de 60
+ * (Pour pouvoir partir à la date t=0 et on t=-60 */
+
+Probleme::Probleme(){
+	
+	m = 4;
+	n = 5;
+	c = 5;
+	eta = 2;
+	
+	/* Création des clients */
+	
+	clients.push_back(new Client(1,3/2.,100));
+	clients.push_back(new Client(2,3,100));
+	clients.push_back(new Client(3,9/2.,100));
+	clients.push_back(new Client(4,6,100));
+	
+	/* Création des produits */
+	
+	produits.push_back(new Produit(1, 310, clients[0]);
+	produits.push_back(new Produit(2, 310, clients[0]);
+	produits.push_back(new Produit(3, 300, clients[2]);
+	produits.push_back(new Produit(4, 360, clients[2]);
+	produits.push_back(new Produit(5, 400, clients[2]);
+	
+	/* construction des batches */
+	
+	build_batches();
+	
+}
+
 Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*> prods, Transport transp) {
 	this->m = m;
 	this->n = n;
@@ -7,4 +39,57 @@ Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*>
 	this->clients = clts;
 	this->produits = prods;
 	this->transport = &transp;
+}
+
+/* Construit la liste des batches en fonction de la liste des produits
+ * Les batches sont construits de la manière suivante :
+ *  - si les produits sont une date due dont la différence entre avec celle qui est minimale parmis ces produits est < à 2* la distance client/entrepôt
+ */ 
+
+Probleme::build_batches(){
+
+	int i;
+	vector<Produit*> tempProduits = this->produits; // On va créer une liste temporaire : On va supprimer les produits à mesures qu'ils sont assignés à des bacs
+	
+	// Prendre le produit à la date due la plus petite
+	// Le rajouter au batch
+	
+	// Prendre tous les produits qui ont une date due < à date due min + 2*dist
+	// Les rajouter au batch
+	
+	// Rajouter ce batch à la liste de batches
+	// Supprimer ces produits nouvellement ajoutés de tempProduits
+
+}
+
+/* Cette fonction prend en paramètre une liste de produits, et retourne le produit qui a la date due min parmis toute cette liste */
+
+Produit* Probleme::produitDueMin(vector<Produit*> prods){
+
+	Produit *prodMin = prods[0];
+	int i;
+
+	for(i=0;i<prods.length;++i){
+		if(prods[i]->dateDue < prodMin->dateDue){
+			prodMin = prods[i];
+		}
+	}
+	
+	return prodMin;
+}
+
+/* Retourne le produit qui a la date due la plus faible, parmis les produits commandés par le client c */
+
+Produit* Probleme::produitDueMinClient(vector<Produit*> prods, Client c){
+	
+	vector<Produits*> tempProds;
+	int i;
+	
+	for(i=0;i<prods.length;++i){
+		if(prods[i].client.h == c.h){
+			tempProds.push_back(prods[i]);
+		}
+	}
+	
+	return produitDueMin(tempProds);
 }

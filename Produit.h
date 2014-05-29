@@ -7,7 +7,7 @@ class Produit {
 	private:
 		int i;					// N° du job
 		int date;				// Date due du job i
-		int client;				// Client qui demande le job i
+		Client *client;				// Client qui demande le job i
 
 	public:
 		Produit(int, int, int);

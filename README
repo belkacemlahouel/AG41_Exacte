@@ -5,3 +5,36 @@ UTBM (Université de Technologie de Belfort-Montbéliard).
 Pour plus d'informations, consultez le fichier PDF "ag41-challenge2014.pdf"
 
 Belkacem Lahouel, Luc Cadoret, 2014.
+
+#####################################################################
+
+Structures de données :
+
+Produit {
+
+	int dateDue;
+	Client demandeur; (a changer plus tard ?)
+	
+}
+
+Batch {
+	Vector<produit> batch;
+	
+	dateDueBatch(); // donne la date due de l'ensemble du batch 
+}
+
+Client {
+	int distEntrepot;
+	int coutStockage;
+	
+}
+
+Probleme {
+
+	Vector<Client>
+	Vector<Batch>
+	Vector<Produit>
+	
+	Toutes les données du problème (n, m, eta, c)
+
+}
