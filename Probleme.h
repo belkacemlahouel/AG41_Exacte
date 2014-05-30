@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Produit.h"
-#include "Client.h"
+#include "Batch.h"
 
 using namespace std;
 

@@ -50,9 +50,14 @@ Probleme::build_batches(){
 
 	int i;
 	vector<Produit*> tempProduits = this->produits; // On va créer une liste temporaire : On va supprimer les produits à mesures qu'ils sont assignés à des bacs
+	int k=0;
+	while(tempProduits.size() > 0){
+		
+		this
 	
-	// Prendre le produit à la date due la plus petite
-	// Le rajouter au batch
+	
+		Produit* tempProd = produitDueMin(tempProduits);
+	
 	
 	// Prendre tous les produits qui ont une date due < à date due min + 2*dist
 	// Les rajouter au batch
