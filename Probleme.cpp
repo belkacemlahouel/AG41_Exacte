@@ -155,8 +155,47 @@ void Probleme::printBatches(){
 }
 
 /* Cette fonction créé une solution avec l'heuristique suivante :
- *      - livrer par ordre de date due min croissante : le batch ayant le produit avec la date due la plus faible en premier
+ *      - trouver le batch avec la somme des dates dues * le coût unitaire  le plus petit
+ *      - regarder si ce batch compromet la livraison des autres (= si on livre ce batch, peut-on respecter la livraison a temps des autres ?)
+ *      - si ce batch n'est pas compromettant, on le livre, sinon, on livre le batch le plus urgent (date due la plus faible)
+ *
+ *      NOTE : CET HEURISTIQUE N'EST PEUT-ETRE PAS VIABLE SELON LES CONFIGURATIONS : mettre en backup l'heuristique "livraison par date due minimum
+ *      croissante" ?
  */
+
+float Probleme::solution_heuristique(){
+
+    vector<Batch*> tempBatches = this->batches;
+    Batch* tempBatch;
+    vector<int> solution;
+    int time = 0;
+    float totalCost = 0;
+
+    while(tempBatches.size() > 0){
+        solution.push_back(0); // 0 est l'entrepôt
+
+        tempBatch = batchEvalCoutMin(tempBatches);
+
+        if(estCompromettant(tempBatches,tempBatch,time)){
+            tempBatch = batchDueMin(tempBatches);
+        }
+
+        solution.push_back(tempBatch->getBatchClient()->getNum());
+
+        totalCost += batchCost(tempBatch,time);
+
+        eraseBatch(tempBatches,tempBatch); // le batch a été livré, on le supprime de la liste de batches à livrer
+    }
+
+    solution.push_back(0); // retour final à l'entrpôt
+
+    this->bestSol = solution;
+    this->eval_bestSol = totalCost;
+
+    return totalCost;
+}
+
+/* CETTE FONCTION HEURISTIQUE EST MOINS EFFICACE, MAIS FONCTIONNE A TOUS LES COUPS
 
 float Probleme::solution_heuristique(){
 
@@ -184,6 +223,19 @@ float Probleme::solution_heuristique(){
     this->eval_bestSol = totalCost;
 
     return totalCost;
+} */
+
+/* Cette fonction retourne le batch qui est évalué comme le moins coûteux de livrer (parmis une liste de batches), sans information de temps */
+Batch* Probleme::batchEvalCoutMin(vector<Batch*> &bs){
+    int i;
+    Batch* best = bs[0];
+
+    for(i=1;i<bs.size();++i){
+        if(bs[i]->dateDueBatch()*bs[i]->getBatchClient()->getCoutUnitaireStockage() < best->dateDueBatch()*best->getBatchClient()->getCoutUnitaireStockage()){
+            best = bs[i];
+        }
+    }
+    return best;
 }
 
 /* Retourne le batch qui contient le produit à la date due la plus faible, parmis une liste de batches */
@@ -254,3 +306,20 @@ void Probleme::printBestSol(){
     cout<<"Evaluation de cette solution : "<<eval_bestSol<<"\n";
     cout<<"\n______________________________________________________\n";
 }
+
+/* Cette fonction regarde si le batch b est compromettant pour les autres (= si sa livraison compromet la livraison à temps d'un autre batch) */
+
+bool Probleme::estCompromettant(vector<Batch*> &bs,Batch* b, int time){
+
+    int i;
+    int tempsLivraison = (b->getBatchClient()->getDist()*2); // temps qu'il faut pour livrer ce batch
+
+    for(i=0;i<bs.size();++i){
+        if(bs[i]->getDueMin() < (time + tempsLivraison + bs[i]->getBatchClient()->getDist())){
+            return true;
+        }
+    }
+
+    return false;
+}
+

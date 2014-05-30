@@ -9,7 +9,6 @@ void Batch::addProduit(Produit* p){
 }
 
 /* Retourne la somme des dates due du batch */
-
 int Batch::dateDueBatch(){
 
 	int i;

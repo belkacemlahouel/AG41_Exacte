@@ -33,6 +33,8 @@ class Probleme {
         float batchCost(Batch* b, int &time);
         void eraseBatch(vector<Batch*> &bs, Batch* b);
         void printBestSol();
+        Batch* batchEvalCoutMin(vector<Batch*> &bs);
+        bool estCompromettant(vector<Batch*> &bs,Batch* b, int time);
 };
 
 #endif // __PROBLEME__
