@@ -10,6 +10,7 @@ Probleme::Probleme(){
 	n = 5;
 	c = 5;
 	eta = 2;
+	eval_bestSol = 0;
 
 	/* Création des clients */
 
@@ -29,9 +30,10 @@ Probleme::Probleme(){
 	/* construction des batches */
 
 	build_batches();
+    solution_heuristique();
 
 	printBatches();
-
+    printBestSol();
 }
 
 Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*> prods) {
@@ -42,8 +44,8 @@ Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*>
 	this->produits = prods;
 }
 
-/* /!\ FONCTION A AMELIORER /!\ Est-il possible de trouver directement les bons batches, sans entrer dans l'arborescence ? 
- * 
+/* /!\ FONCTION A AMELIORER /!\ Est-il possible de trouver directement les bons batches, sans entrer dans l'arborescence ?
+ *
  * Construit la liste des batches en fonction de la liste des produits
  * Les batches sont construits de la manière suivante :
  *  - si les produits sont une date due dont la différence entre avec celle qui est minimale parmis ces produits est < à 2* la distance client/entrepôt
@@ -145,9 +147,110 @@ Produit* Probleme::produitDueMinClient(vector<Produit*> prods, Client* cli){
 
 void Probleme::printBatches(){
 
-	int i,j;
+	int i;
 
 	for(i=0;i<batches.size();++i){
         batches[i]->printBatch();
 	}
+}
+
+/* Cette fonction créé une solution avec l'heuristique suivante :
+ *      - livrer par ordre de date due min croissante : le batch ayant le produit avec la date due la plus faible en premier
+ */
+
+float Probleme::solution_heuristique(){
+
+    vector<Batch*> tempBatches = this->batches;
+    Batch* tempBatch;
+    vector<int> solution;
+    int time = 0;
+    float totalCost = 0;
+
+    while(tempBatches.size() > 0){
+        solution.push_back(0); // 0 est l'entrepôt
+
+        tempBatch = batchDueMin(tempBatches);
+
+        solution.push_back(tempBatch->getBatchClient()->getNum());
+
+        totalCost += batchCost(tempBatch,time);
+
+        eraseBatch(tempBatches,tempBatch); // le batch a été livré, on le supprime de la liste de batches à livrer
+    }
+
+    solution.push_back(0); // retour final à l'entrpôt
+
+    this->bestSol = solution;
+    this->eval_bestSol = totalCost;
+
+    return totalCost;
+}
+
+/* Retourne le batch qui contient le produit à la date due la plus faible, parmis une liste de batches */
+
+Batch* Probleme::batchDueMin(vector<Batch*> &bs){
+
+    Batch* batchMin = bs[0];
+    int i;
+
+    for(i=1;i<bs.size();++i){
+        if(bs[i]->getDueMin() < batchMin->getDueMin()){
+            batchMin = bs[i];
+        }
+    }
+
+    return batchMin;
+}
+
+/* Cette méthode calcule le coût de la livraison d'un batch à un temps "time".
+ * Ce coût comporte :
+ *  - Les coûts de transport aller/retour (distance entrepot/client * eta * 2)
+ *  - Les coûts de stockage (cout_u *(date_due - time) pour chaque produit)
+ *
+ * Note : la variable time est passée par référence, et modifiée au cours de ce calcul */
+
+float Probleme::batchCost(Batch* b, int &time){
+
+    float cost = 0;
+    int i;
+    float cu = b->getBatchClient()->getCoutUnitaireStockage();
+
+    cost += b->getBatchClient()->getDist()*this->eta;
+    time += b->getBatchClient()->getDist();
+
+    for(i=0;i<b->getBatch().size();++i){
+        int dateDue = b->getBatch()[i]->getDateDue();
+        cost += cu *(dateDue - time);
+    }
+
+    cost += b->getBatchClient()->getDist()*this->eta;
+    time += b->getBatchClient()->getDist();
+
+    return cost;
+}
+
+/* Efface le batch d'une liste de batches */
+
+void Probleme::eraseBatch(vector<Batch*> &bs, Batch* b){
+    vector<Batch*>::iterator it;
+
+    for(it=bs.begin();it!=bs.end();++it){
+        if(*it == b){
+            bs.erase(it);
+            break;
+        }
+    }
+}
+
+/* Affiche la meilleure solution trouvee jusqu'a present */
+void Probleme::printBestSol(){
+    int i;
+    cout<<"\n______________________________________________________\n";
+    cout<<"\nMeilleure solution trouvee :\n\t";
+    for(i=0;i<bestSol.size()-1;++i){
+        cout<<bestSol[i]<<"--->";
+    }
+    cout<<"0\n\n";
+    cout<<"Evaluation de cette solution : "<<eval_bestSol<<"\n";
+    cout<<"\n______________________________________________________\n";
 }

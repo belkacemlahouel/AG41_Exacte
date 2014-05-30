@@ -19,6 +19,9 @@ class Batch{
 		int dateDueBatch();
 		int getBatchSize();
         int printBatch();
+        int getDueMin();
+        vector<Produit*> getBatch();
+        Client* getBatchClient();
 
 
 };

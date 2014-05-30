@@ -22,6 +22,21 @@ int Batch::dateDueBatch(){
 	return sum;
 }
 
+/* Retourne la date due la plus petite dans ce batch */
+
+int Batch::getDueMin(){
+    int min = batch[0]->getDateDue();
+    int i;
+
+    for(i=1;i<batch.size();++i){
+        if(batch[i]->getDateDue() < min){
+            min = batch[i]->getDateDue();
+        }
+    }
+
+    return min;
+}
+
 int Batch:: getBatchSize(){
     return batch.size();
 }
@@ -32,4 +47,14 @@ int Batch::printBatch(){
 		for(j=0;j<this->batch.size();++j){
 			cout<<"\tProduit "<<this->batch[j]->getNProduit()<<", Date due : "<<this->batch[j]->getDateDue()<<"\n";
     }
+}
+
+/* Si les batches sont bien construits, tous les produits dans les batches sont destinés au même client
+ * On peut donc dire qu'un Batch est destiné à un seul client */
+Client* Batch::getBatchClient(){
+    return batch[0]->getClient();
+}
+
+vector<Produit*> Batch::getBatch(){
+    return this->batch;
 }
