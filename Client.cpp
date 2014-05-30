@@ -10,3 +10,11 @@ Client::Client(int h, int cout_u,int dist) {
 int Client::getCoutUnitaireStockage() {
 	return cout_u;
 }
+
+int Client::getDist(){
+    return this->dist;
+}
+
+int Client::getNum(){
+    return this->h;
+}

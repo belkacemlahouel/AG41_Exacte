@@ -1,8 +1,6 @@
 #ifndef __PROBLEME__
 #define __PROBLEME__
 
-#include <vector>
-#include "Produit.h"
 #include "Batch.h"
 
 using namespace std;
@@ -19,9 +17,14 @@ class Probleme {
 		vector<Batch*> batches;
 
 	public:
-		Probleme(int, int, int*, vector<Client*>, vector<Produit*>, Transport);
+		Probleme(int, int, int*, vector<Client*>, vector<Produit*>);
 		Probleme();
 		~Probleme(){}
+		void build_batches();
+		void printBatches();
+		void eraseProduit(vector<Produit*> &prods, Produit* p);
+        Produit* produitDueMin(vector<Produit*> &prods);
+        Produit* produitDueMinClient(vector<Produit*> prods, Client* c);
 };
 
 #endif // __PROBLEME__

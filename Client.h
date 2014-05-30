@@ -11,6 +11,8 @@ class Client {
 	public:
 		Client(int, int, int);
 		int getCoutUnitaireStockage();
+		int getDist();
+		int getNum();
 };
 
 #endif // __CLIENT__

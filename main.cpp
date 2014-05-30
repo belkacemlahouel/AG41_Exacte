@@ -4,9 +4,9 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	// Probleme p;
+	Probleme p = Probleme();
 
 	cout << "end of challenge... thank you." << endl;
-	
+
 	return 0;
 }
