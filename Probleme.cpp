@@ -42,7 +42,9 @@ Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*>
 	this->produits = prods;
 }
 
-/* Construit la liste des batches en fonction de la liste des produits
+/* /!\ FONCTION A AMELIORER /!\ Est-il possible de trouver directement les bons batches, sans entrer dans l'arborescence ? 
+ * 
+ * Construit la liste des batches en fonction de la liste des produits
  * Les batches sont construits de la manière suivante :
  *  - si les produits sont une date due dont la différence entre avec celle qui est minimale parmis ces produits est < à 2* la distance client/entrepôt
  */
@@ -88,13 +90,6 @@ void Probleme::build_batches(){
 
 		++k;
 	}
-
-	// Prendre tous les produits qui ont une date due < à date due min + 2*dist
-	// Les rajouter au batch
-
-	// Rajouter ce batch à la liste de batches
-	// Supprimer ces produits nouvellement ajoutés de tempProduits
-
 }
 
 
