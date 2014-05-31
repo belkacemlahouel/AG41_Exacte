@@ -35,6 +35,8 @@ class Probleme {
         void printBestSol();
         Batch* batchEvalCoutMin(vector<Batch*> &bs);
         bool estCompromettant(vector<Batch*> &bs,Batch* b, int time);
+
+        bool solve();	// Renvoie vrai si solution admissible trouvée
 };
 
 #endif // __PROBLEME__

@@ -4,6 +4,8 @@
 using namespace std;
 
 int main(int argc, char** argv) {
+	cout << "______________________________________________________" << endl;
+
 	Probleme p = Probleme();
 
 	cout << "end of challenge... thank you." << endl;

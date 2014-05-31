@@ -297,14 +297,14 @@ void Probleme::eraseBatch(vector<Batch*> &bs, Batch* b){
 /* Affiche la meilleure solution trouvee jusqu'a present */
 void Probleme::printBestSol(){
     int i;
-    cout<<"\n______________________________________________________\n";
-    cout<<"\nMeilleure solution trouvee :\n\t";
+    cout<<"______________________________________________________\n";
+    cout<<"Meilleure solution trouvee :\n\t";
     for(i=0;i<bestSol.size()-1;++i){
         cout<<bestSol[i]<<"--->";
     }
-    cout<<"0\n\n";
+    cout<<"0\n\n";	// A la fin, on revient chez le fournisseur
     cout<<"Evaluation de cette solution : "<<eval_bestSol<<"\n";
-    cout<<"\n______________________________________________________\n";
+    cout<<"______________________________________________________\n";
 }
 
 /* Cette fonction regarde si le batch b est compromettant pour les autres (= si sa livraison compromet la livraison à temps d'un autre batch) */
