@@ -10,7 +10,7 @@ int Produit::getDateDue() {
 	return date;
 }
 
-int Produit::getNClient() {
+Client* Produit::getClient() {
 	return client;
 }
 

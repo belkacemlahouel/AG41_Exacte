@@ -10,9 +10,9 @@ class Produit {
 		Client *client;				// Client qui demande le job i
 
 	public:
-		Produit(int, int, int);
+		Produit(int, int, Client*);
 		int getDateDue();
-		int getNClient();
+		Client* getClient();
 		int getNProduit();
 		int coutStockage(int, Client*);
 

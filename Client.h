@@ -9,8 +9,10 @@ class Client {
 		bool fini;			// Est-ce que le client a fini d'être livré ?
 
 	public:
-		Client(int, int, int);
-		int getCoutUnitaireStockage();
+		Client(int, float, int);
+		float getCoutUnitaireStockage();
+		int getDist();
+		int getNum();
 };
 
 #endif // __CLIENT__
