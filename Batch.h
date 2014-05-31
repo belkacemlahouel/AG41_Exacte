@@ -13,17 +13,18 @@ class Batch{
 		vector<Produit*> batch;
 
 	public:
-		Batch();
+		Batch(){}
 		~Batch(){}
 		void addProduit(Produit*);
 		int dateDueBatch();
 		int getBatchSize();
-        int printBatch();
+        void printBatch();
         int getDueMin();
         vector<Produit*> getBatch();
         Client* getBatchClient();
 
-
+        int coutStockage(int);
+        int sommeAvancesDueMin();
 };
 
 #endif // BATCH
