@@ -1,6 +1,6 @@
 #include "Produit.h"
 
-Produit::Produit(int i, int date, int client) {
+Produit::Produit(int i, int date, Client* client) {
 	this->i = i;
 	this->date = date;
 	this->client = client;
