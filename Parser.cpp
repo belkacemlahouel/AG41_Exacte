@@ -1,3 +1,5 @@
+#include "Parser.h"
+
 void Parser::parseFile(string name){
 
 	ifstream stream;
@@ -15,7 +17,7 @@ void Parser::parseFile(string name){
 
 			desc = line.substr(0,line.find(":"));
 			remove_spaces(desc);
-			
+
 			/* le comportement du parseur sera différent en fonction de la description de la ligne */
 			if(strcmp(desc.c_str(),"NBR_PRODUCT") == 0){
 
