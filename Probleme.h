@@ -2,8 +2,8 @@
 #define __PROBLEME__
 
 #include <vector>
-#include "Produit.h"
 #include "Client.h"
+#include "Produit.h"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ class Probleme {
 		int* nh;						// Nombre de produits/client
 		vector<Client*> clients;		// Liste des clients
 		vector<Produit*> produits;		// Liste des produits
-		vector<Batch*> batches;
+		//vector<Batch*> batches;
 
 	public:
 		Probleme(int, int, int*, vector<Client*>, vector<Produit*>, Transport);
