@@ -6,12 +6,12 @@
 class Produit {
 	private:
 		int i;					// N° du job
-		int date;				// Date due du job i
+		double date;				// Date due du job i
 		Client *client;				// Client qui demande le job i
 
 	public:
-		Produit(int, int, Client*);
-		int getDateDue();
+		Produit(int, double, Client*);
+		double getDateDue();
 		Client* getClient();
 		int getNProduit();
 		int coutStockage(int, Client*);

@@ -1,7 +1,7 @@
 #include "Client.h"
 
 // Client(numéro de client, coût unitaire de stockage, distance au fournisseur)
-Client::Client(int h, float cout_u, int dist) {
+Client::Client(int h, double cout_u, float dist) {
 	fini = false;
 	this->h = h;
 	this->cout_u = cout_u;

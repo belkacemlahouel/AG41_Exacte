@@ -1,15 +1,15 @@
 #include "Parser.h"
-#include <iostream>
 
 using namespace std;
 
 int main(int argc, char** argv) {
 	cout << "______________________________________________________" << endl;
 
-    Parser parser = Parser();
-    parser.parseFile("instance15n3cl.txt");
+    Parser parser = Parser("instance15n3cl.txt");
 
-	//Probleme p = Probleme();
+	Probleme p = Probleme();
+
+	parser.initialiser_Probleme(p);
 
 	cout << "end of challenge... thank you." << endl;
 

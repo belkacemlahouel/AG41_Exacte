@@ -1,12 +1,13 @@
 #ifndef __PARSER__
 #define __PARSER__
 
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <vector>
+#include <iomanip>
 #include <list>
 #include "Probleme.h"
 
@@ -19,15 +20,19 @@ class Parser{
 		int m;
 		float eta;
 		int c; // capacite transporteur
-		
-		list<Client> clients;
-		list<Produit> produits;
-	
+
+		vector<Client*> clients;
+		vector<Produit*> produits;
+
+        void parseFile(string name);
+
 	public:
-		Parser(){}
+		Parser(string filename);
 		~Parser(){}
-		void parseFile(string name);
 		void remove_spaces(string &str);
+		void print_produits();
+		void initialiser_Probleme(Probleme p);
+
 
 };
 

@@ -4,37 +4,7 @@
  * Note : ce jeu d'essai est en fait le jeu d'essai dans l'énoncé, mais tout est décalé de 60
  * (Pour pouvoir partir à la date t=0 et on t=-60 */
 
-Probleme::Probleme(){
-
-	m = 4;
-	n = 5;
-	c = 5;
-	eta = 2;
-	eval_bestSol = 0;
-
-	/* Création des clients */
-
-	clients.push_back(new Client(1,3/2.,100));
-	clients.push_back(new Client(2,3,100));
-	clients.push_back(new Client(3,9/2.,100));
-	clients.push_back(new Client(4,6,100));
-
-	/* Création des produits */
-
-	produits.push_back(new Produit(1, 310, clients[0]));
-	produits.push_back(new Produit(2, 310, clients[0]));
-	produits.push_back(new Produit(3, 300, clients[2]));
-	produits.push_back(new Produit(4, 360, clients[2]));
-	produits.push_back(new Produit(5, 400, clients[2]));
-
-	/* construction des batches */
-
-	build_batches();
-    solution_heuristique();
-
-	printBatches();
-    printBestSol();
-}
+Probleme::Probleme(){}
 
 Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*> prods) {
 	this->m = m;
@@ -321,5 +291,29 @@ bool Probleme::estCompromettant(vector<Batch*> &bs,Batch* b, int time){
     }
 
     return false;
+}
+
+void Probleme::setNbProduits(int nb){
+    n = nb;
+}
+
+void Probleme::setNbClients(int nb){
+    m = nb;
+}
+
+void Probleme::setCapacite(int cap){
+    c = cap;
+}
+
+void Probleme::setCoutTransport(float cout_t){
+    eta = cout_t;
+}
+
+void Probleme::setClients(vector<Client*> cl){
+    clients = cl;
+}
+
+void Probleme::setProduits(vector<Produit*> pl){
+    produits = pl;
 }
 

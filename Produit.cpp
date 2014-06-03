@@ -1,14 +1,14 @@
 #include "Produit.h"
 
 // Produit(numéro de produit, date de livraison due, Client concerné)
-Produit::Produit(int i, int date, Client* client) {
+Produit::Produit(int i, double date, Client* client) {
 	this->i = i;
 	this->date = date;
 	this->client = client;
 }
 
 // Renvoie la date due de livraison
-int Produit::getDateDue() {
+double Produit::getDateDue() {
 	return date;
 }
 

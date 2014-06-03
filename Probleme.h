@@ -12,7 +12,7 @@ class Probleme {
 		int m; 							// Nombre de clients
 		int n; 							// Nombre de produits total
 		int c;							// Capacité du transporteur
-		int eta;						// Coefficient pour les coûts de transport
+		float eta;						// Coefficient pour les coûts de transport
 		int* nh;						// Nombre de produits/client
 		vector<Client*> clients;		// Liste des clients
 		vector<Produit*> produits;		// Liste des produits
@@ -39,6 +39,12 @@ class Probleme {
         bool estCompromettant(vector<Batch*> &bs,Batch* b, int time);
 
         bool solve();	// Renvoie vrai si solution admissible trouvée
+        void setNbProduits(int);
+        void setNbClients(int);
+        void setCapacite(int);
+        void setCoutTransport(float);
+        void setClients(vector<Client*>);
+        void setProduits(vector<Produit*>);
 };
 
 #endif // __PROBLEME__
