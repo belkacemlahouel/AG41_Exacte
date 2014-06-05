@@ -5,7 +5,7 @@ using namespace std;
 int main(int argc, char** argv) {
 	cout << "______________________________________________________" << endl;
 
-    Parser parser = Parser("instance15n3cl.txt");
+    Parser parser = Parser("instances/instance15n3cl.txt");
 
 	Probleme p = Probleme();
 
