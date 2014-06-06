@@ -1,50 +1,51 @@
 #ifndef __PROBLEME__
 #define __PROBLEME__
 
-#include <vector>
-#include "Client.h"
+#include "Tools.h"
 #include "Batch.h"
+#include <algorithm>
 
 using namespace std;
 
 class Probleme {
 	private:
-		int m; 							// Nombre de clients
-		int n; 							// Nombre de produits total
-		int c;							// Capacité du transporteur
+		// --- Input du problème
+		int capa;						// Capacité du transporteur
 		float eta;						// Coefficient pour les coûts de transport
-		int* nh;						// Nombre de produits/client
 		vector<Client*> clients;		// Liste des clients
 		vector<Produit*> produits;		// Liste des produits
-		vector<Batch*> batches;
 
-		vector<int> bestSol;            // La meilleure solution trouvée jusqu'à présent
-		float eval_bestSol;             // L'évaluation de la meilleure solution (bestSol)
+		// --- Recherche de la meilleure solution
+		vector<Batch*> batchs;
+
+		vector<Batch*> bestSol;			// Meilleure solution
+		float evalBestSol;				// + Evaluation
+		vector<Batch*> sol;				// Solution en cours
+		float evalSol;					// + Evaluation
+
+		float dateCourante;				// Date courante lors du calcul
+
+		// --- Méthodes privées
+		void solve(int iter, vector<Batch*> reste);
+		// template<class T> void viderVector(vector<T>); // --> tools
+        void solutionHeuristique();
 
 	public:
-		Probleme(int, int, int*, vector<Client*>, vector<Produit*>);
+		Probleme(int capa, float eta, vector<Client*>, vector<Produit*>);
 		Probleme();
-		~Probleme(){}
-		void build_batches();
-		void printBatches();
-		void eraseProduit(vector<Produit*> &prods, Produit* p);
-        Produit* produitDueMin(vector<Produit*> &prods);
-        Produit* produitDueMinClient(vector<Produit*> prods, Client* c);
-        float solution_heuristique();
-        Batch* batchDueMin(vector<Batch*> &bs);
-        float batchCost(Batch* b, int &time);
-        void eraseBatch(vector<Batch*> &bs, Batch* b);
-        void printBestSol();
-        Batch* batchEvalCoutMin(vector<Batch*> &bs);
-        bool estCompromettant(vector<Batch*> &bs,Batch* b, int time);
+		~Probleme();
 
-        bool solve();	// Renvoie vrai si solution admissible trouvée
-        void setNbProduits(int);
-        void setNbClients(int);
-        void setCapacite(int);
-        void setCoutTransport(float);
-        void setClients(vector<Client*>);
-        void setProduits(vector<Produit*>);
+		void buildBatchs();
+		void printBatchs();
+		void printProduits();
+		void printBestSol();
+		void printSol(int niveau);
+
+        bool encorePossible(vector<Batch*> reste);
+        void solve();
+
+        float livraison(Batch*);		// Renvoient le coût de cette livraison
+        float annulerLivraison(Batch*); // et avancent (ou reculent) la date
 };
 
 #endif // __PROBLEME__

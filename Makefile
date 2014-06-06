@@ -1,22 +1,26 @@
-CXX = g++
-# CCFLAGS = -Werror -Wall -O3
-# CCFLAGS = -Wall -Werror -ansi -pedantic -fPIC -Wextra -g
+# make exec clean
 
-TARGET   = challenge
-SRCFILES = main.cpp Probleme.cpp Produit.cpp Client.cpp Batch.cpp
-HFILES   = Probleme.h Client.h Produit.h Batch.h
+GXX = g++
+
+CCFLAGS = -g 
+# CCFLAGS = -Wall -Werror -ansi -pedantic -fPIC -Wextra -g -O3
+
+TARGET 		= challenge
+SRCFILES 	= Client.cpp Produit.cpp Batch.cpp Probleme.cpp Parser.cpp main.cpp
+HFILES		= Tools.h Client.h Produit.h Batch.h Probleme.h Parser.h
 
 exec: all
 	./$(TARGET)
 
+val: all
+	valgrind ./$(TARGET)
+
 all:
-	$(CXX) $(CCFLAGS) $(SRCFILES) -o $(TARGET)
+	$(GXX) $(CCFLAGS) $(SRCFILES) -o $(TARGET)
 
 clean:
-	@echo "Cleaning .o and ~ files in current directory"
-	rm -rf *.o *~ $(TARGET).dSYM
+	rm -rf *.o *~
 
 clear: clean
-	@echo "Cleaning target file"
-	rm -rf challenge
+	rm -rf $(TARGET)*
 

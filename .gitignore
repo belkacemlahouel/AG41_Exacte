@@ -1,10 +1,12 @@
 *~
 .o
 
+/bin
+/obj
+AG41_Exacte.cbp
 
-/bin/
-/obj/
-/AG41_Exacte.cbp
-/AG41_Exacte.layout
-/AG41_Exacte.depend
-/instance*
+AG41_Exacte.layout
+AG41_Exacte.depend
+
+challenge.dSYM/*
+

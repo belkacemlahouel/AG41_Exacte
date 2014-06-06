@@ -4,6 +4,11 @@ Parser::Parser(string filename){
     parseFile(filename);
 }
 
+Parser::~Parser() {
+	Tools::viderVector(clients);
+	Tools::viderVector(produits);
+}
+
 void Parser::parseFile(string name){
 
 	ifstream stream;
@@ -23,7 +28,7 @@ void Parser::parseFile(string name){
 		while(std::getline(stream,line)){ // stream.eof() deprecated
 
 			desc = line.substr(0,line.find(":"));
-			remove_spaces(desc);
+			removeSpaces(desc);
 
 			/* le comportement du parseur sera différent en fonction de la description de la ligne */
 			if(strcmp(desc.c_str(),"NBR_PRODUCT") == 0){
@@ -96,7 +101,8 @@ void Parser::parseFile(string name){
                 }
                 cout<<"\n\n";
 
-                delete(buff);
+                free(buff);
+				// free(temp);
 
 			} else if(strcmp(desc.c_str(),"JOB_DUE_DATES") == 0){
                 data = line.substr(line.find(":"),line.find("\n"));
@@ -119,7 +125,8 @@ void Parser::parseFile(string name){
                 }
                 cout<<"\n\n";
 
-                delete(buff);
+                free(buff);
+				// free(temp);
 			}
 		}
 
@@ -163,7 +170,7 @@ void Parser::parseFile(string name){
 		cout<<"Parsage fini.\n";
 		stream.close();
 
-		print_produits();
+		printProduits();
 
 	} else {
 
@@ -174,29 +181,37 @@ void Parser::parseFile(string name){
 
 /* Supprime tous les espaces "parasites" dans la string str */
 
-void Parser::remove_spaces(string &input){
+void Parser::removeSpaces(string &input){
 	input.erase(std::remove(input.begin(),input.end(),' '),input.end());
 }
 
-void Parser::print_produits(){
+void Parser::printProduits(){
 
     vector<Produit*>::iterator it;
 
     cout<<"\nListe des jobs :\n\n";
 
     for(it = produits.begin();it != produits.end(); ++it){
-        cout<<"\tNum : "<<(*it)->getNProduit()<<"\n";
+        cout<<"\tNum : "<<(*it)->getNum()<<"\n";
         cout<<"\tClient : "<<(*it)->getClient()->getNum()<<"\n";
-        cout<< setprecision(12) << setiosflags(ios::fixed) << setiosflags(ios::showpoint) << "\tDate due : "<<(*it)->getDateDue()<<"\n";
+        cout<< setprecision(12) << setiosflags(ios::fixed) << setiosflags(ios::showpoint) << "\tDate due : "<<(*it)->dateDue()<<"\n";
         cout<<"\n";
     }
 }
 
-void Parser::initialiser_Probleme(Probleme p){
-    p.setNbClients(m);
-    p.setNbProduits(n);
-    p.setCapacite(c);
-    p.setCoutTransport(eta);
-    p.setClients(clients);
-    p.setProduits(produits);
+float Parser::getEta() {
+    return eta;
 }
+
+int Parser::getCapa() {
+    return c;
+}
+
+vector<Client*> Parser::getClients() {
+    return clients;
+}
+
+vector<Produit*> Parser::getProduits() {
+    return produits;
+}
+

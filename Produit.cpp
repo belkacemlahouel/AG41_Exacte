@@ -1,28 +1,28 @@
 #include "Produit.h"
 
-// Produit(numéro de produit, date de livraison due, Client concerné)
-Produit::Produit(int i, double date, Client* client) {
-	this->i = i;
-	this->date = date;
-	this->client = client;
+Produit::Produit(int _i, float _date, Client* _client) {
+	i = _i;
+	date = _date;
+	client = _client;
 }
 
-// Renvoie la date due de livraison
-double Produit::getDateDue() {
+float Produit::dateDue() {
 	return date;
 }
 
-// Renvoie un pointeur sur le Client concerné
 Client* Produit::getClient() {
 	return client;
 }
 
-// Renvoie le numéro de produit
-int Produit::getNProduit() {
+int Produit::getNum() {
 	return i;
 }
 
-// Coût de stockage du produit, si la commande arrive trop tôt chez le Client
-int Produit::coutStockage(int t, Client* c) {
-	return (date - t) * c->getCoutUnitaireStockage();
+// Comment implémenter les coûts si retard ...?
+float Produit::coutStockage(int t) {
+	return (date-t) * client->coutUnitaireStockage();
+}
+
+void Produit::printProduit() {
+	cout << "\tProduit " << getNum() << ", Date due : " << dateDue() << "\n";
 }

@@ -1,319 +1,505 @@
 #include "Probleme.h"
 
-/* Constructeur par défaut, n'est utilisé que pour tester le jeu d'essai fourni dans l'énoncé
- * Note : ce jeu d'essai est en fait le jeu d'essai dans l'énoncé, mais tout est décalé de 60
- * (Pour pouvoir partir à la date t=0 et on t=-60 */
+Probleme::Probleme(int _capa, float _eta, vector<Client*> _clients,
+											vector<Produit*> _produits) {
+	capa = _capa;
+	eta = _eta;
 
-Probleme::Probleme(){}
+	clients = _clients;
+	produits = _produits;
 
-Probleme::Probleme(int m, int n, int* nh, vector<Client*> clts, vector<Produit*> prods) {
-	this->m = m;
-	this->n = n;
-	this->nh = nh;
-	this->clients = clts;
-	this->produits = prods;
+	buildBatchs();
+
+	evalSol = 0;
+	evalBestSol = 0;
+
+	dateCourante = 0.0f;
 }
 
-/* /!\ FONCTION A AMELIORER /!\ Est-il possible de trouver directement les bons batches, sans entrer dans l'arborescence ?
- *
- * Construit la liste des batches en fonction de la liste des produits
- * Les batches sont construits de la manière suivante :
- *  - si les produits sont une date due dont la différence entre avec celle qui est minimale parmis ces produits est < à 2* la distance client/entrepôt
- */
+// Instance de base, voir sujet
+Probleme::Probleme() {
+	capa = 5;
+	eta = 2;
 
-void Probleme::build_batches(){
+	// Création des clients
+	clients.push_back(new Client(1, 100, 3/2.));
+	clients.push_back(new Client(2, 100, 3));
+	clients.push_back(new Client(3, 100, 9/2.));
+	clients.push_back(new Client(4, 100, 6));
 
-	int i;
-	vector<Produit*> tempProduits = this->produits; // On va créer une liste temporaire : On va supprimer les produits à mesures qu'ils sont assignés à des bacs
-	int k=0;
-	bool trouve;
-	int tempDueMin;
-	Produit* tempProd;
-	Client* tempClient;
-	vector<Produit*>::iterator it;
+	// Création des produits, dans le désordre exprès
+	produits.push_back(new Produit(1, 310, clients[0]));
+	produits.push_back(new Produit(2, 310, clients[0]));
+	produits.push_back(new Produit(3, 300, clients[2]));
+	produits.push_back(new Produit(4, 360, clients[2]));
+	produits.push_back(new Produit(5, 400, clients[2]));
 
-	while(tempProduits.size() > 0){
+	// construction des batchs
+	buildBatchs();
 
-		this->batches.push_back(new Batch());
+	// initialisation des évaluations
+	evalSol = 0;
+	evalBestSol = 0;
 
-		tempProd = produitDueMin(tempProduits);
-		tempClient = tempProd->getClient(); /* On enregistre le client, puisque tous les autres produits du batch seront aussi pour ce client */
-		tempDueMin = tempProd->getDateDue();
+	// initialisation des solutions
+	sol = batchs;
+	bestSol = batchs;
 
-		this->batches[k]->addProduit(tempProd);
+	dateCourante = 0;
 
-		eraseProduit(tempProduits,tempProd);
+	cout << "Initialisation instance de test OK\n";
+}
 
-		if(tempProduits.size() > 0){
-            trouve = true;
-			while(this->batches[k]->getBatchSize() < c && trouve == true){
-                trouve = false;
-				// On cherche un produit dont la date due est <= tempDueMin + distance client/entrepot*2
-				tempProd = produitDueMinClient(tempProduits,tempClient);
-				if(tempProd != NULL){
-                    if(tempProd->getDateDue() < tempDueMin + (tempClient->getDist()*2)){
-                        this->batches[k]->addProduit(tempProd);
-                        eraseProduit(tempProduits,tempProd);
-                        trouve = true;
-                    }
-				}
+Probleme::~Probleme() {
+	// Tools::viderVector(clients);
+	// Tools::viderVector(produits);
+	// Supprimés par le Parseur...
+
+	Tools::viderVector(batchs);
+}
+
+// --> tools
+// template<class T> void Probleme::viderVector(vector<T> vect) {
+// 	while (vect.size() > 0) {
+// 		delete vect[0];
+// 		vect.erase(vect.begin());
+// 	}
+// }
+
+// Batchs faits "bêtement" ici...
+void Probleme::buildBatchs() {
+	// Tri produits à faire sur les produits
+	cout << "Avant tri" << endl;
+	printProduits();
+	sort(produits.begin(), produits.end(), Tools::comparatorProduitPtrDateDue);
+	cout << "Après tri" << endl;
+	printProduits();
+
+	vector<Produit*> tmpProduits = produits;
+
+	while (tmpProduits.size() > 0) {
+		// cout << "Il reste " << tmpProduits.size() << " produits" << endl;
+
+		Batch* tmp = new Batch(tmpProduits[0]);
+		tmpProduits.erase(tmpProduits.begin());
+
+		vector<Produit*>::iterator it = tmpProduits.begin();
+
+		while (it != tmpProduits.end()) {
+			// cout << "Recherche de produits avec le même client" << endl;
+			if ((*it)->getClient()->getNum() == tmp->getClient()->getNum() &&
+														tmp->size() < capa) {
+				// cout << "Même client trouvé" << endl;
+				tmp->addProduit((*it));
+				tmpProduits.erase(it);
+			} else {
+				++it;
 			}
 		}
 
-		++k;
+		batchs.push_back(tmp);
 	}
 }
 
+void Probleme::solutionHeuristique() {
+	// Nous n'avons plus qu'à dire que la solution heuristique
+	// est la liste des batchs ordonnés
+	sort(batchs.begin(), batchs.end(), Tools::comparatorBatchPtrDateDue);
+	sol = batchs;
 
-/* Ecrase le produit p dans la liste de produits prods */
+	// cout << "batchs.size() : " << batchs.size() << endl;
+	// cout << "bestSol.size() : " << bestSol.size() << endl;
 
-void Probleme::eraseProduit(vector<Produit*> &prods, Produit* p){
-	vector<Produit*>::iterator it;
+	evalBestSol = 0;
+	for (int i = 0; i < sol.size(); ++i) {
+		evalBestSol += livraison(sol[i]);
+	}
 
-	for(it = prods.begin();it != prods.end();++it){
-		if(*it == p){
-			prods.erase(it);
-			break;
+	evalSol = 0;
+	bestSol = sol;
+
+	dateCourante = 0;
+	// cout << "Solution heuristique OK\n";
+}
+
+void Probleme::printBatchs() {
+	int i;
+	for(i = 0; i < batchs.size(); ++i) {
+        batchs[i]->printBatch();
+	}
+}
+
+void Probleme::printProduits() {
+	cout << "Liste des produits à livrer :" << endl;
+	for (int i = 0; i < produits.size(); ++i) {
+		produits[i]->printProduit();
+	}
+	cout << endl;
+}
+
+void Probleme::printBestSol() {
+    int i;
+    cout << "______________________________________________________\n";
+    cout << "Meilleure solution trouvee :\n\t";
+    for (i = 0; i < bestSol.size(); ++i) {
+        cout << "0--->" << bestSol[i]->getClient()->getNum() << "--->";
+    }
+    cout << "0\n\n";	// A la fin, on revient chez le fournisseur
+    cout << "Evaluation de cette solution : " << evalBestSol << "\n";
+    cout << "______________________________________________________\n";
+}
+
+void Probleme::printSol(int niveau) {
+	int i;
+    cout << "______________________________________________________\n";
+    cout << "Solution courante trouvee :\n\t";
+    for (i = 0; i <= niveau; ++i) {
+        cout << "0--->" << sol[i]->getClient()->getNum() << "--->";
+    }
+    cout << "0\n\n";	// A la fin, on revient chez le fournisseur
+    cout << "Evaluation de cette solution : " << evalSol << "\n";
+    cout << "______________________________________________________\n";
+}
+
+float Probleme::livraison(Batch* b) {
+	float rep = b->getClient()->getDist() * 2*eta;
+	dateCourante += b->getClient()->getDist();
+	rep += b->coutStockage(dateCourante);
+	dateCourante += b->getClient()->getDist();
+	return rep;
+}
+
+float Probleme::annulerLivraison(Batch* b) {
+	float rep = b->getClient()->getDist() * 2*eta;
+	dateCourante -= b->getClient()->getDist();
+	rep += b->coutStockage(dateCourante);
+	dateCourante -= b->getClient()->getDist();
+	return rep;
+}
+
+void Probleme::solve() {
+	cout << "Lancement heuristique" << endl;
+	// Appel des autres heuristiques et ne garder que la meilleure solution
+	solutionHeuristique();
+
+	printBestSol();
+	cout << endl;
+
+	dateCourante = 0;
+	cout << "Lancement résolution" << endl;
+	solve(0, batchs);
+
+	/*dateCourante = 0;
+	cout << "Est-ce que livraison/annulerLivraison fonctionnent ?" << endl;
+	cout << "Date avant : " << dateCourante << endl;
+	cout << "livraison : " << livraison(batchs[0]) << endl;
+	cout << "annulerLivraison : " << annulerLivraison(batchs[0]) << endl;
+	cout << "Date après : " << dateCourante << endl;
+	cout << "Est-ce qu'elles fonctionnent ? :: OUI" << endl;*/
+}
+
+void Probleme::solve(int iter, vector<Batch*> reste) {
+	// cout << "reste.size() : " << reste.size() << endl;
+	if (evalSol < evalBestSol && encorePossible(reste)) {
+		if (iter == batchs.size()-1 && reste.size() == 1) {
+			sol[iter] = reste[0];
+			evalSol += livraison(reste[0]);
+
+			if (evalSol < evalBestSol) {
+				cout << "Une meilleure solution est trouvée" << endl;
+				evalBestSol = evalSol;
+				bestSol = sol;
+			}
+			evalSol -= annulerLivraison(reste[0]);
+		} else {
+			for (int i = 0; i < reste.size(); ++i) {
+				// cout << "iter : " << iter << ", " << i << endl;
+
+				sol[iter] = reste[i];
+				evalSol += livraison(reste[i]);
+
+				printSol(iter);
+
+				vector<Batch*> reste2 = reste;
+				reste2.erase(reste2.begin() + i);
+				solve(iter+1, reste2);
+
+				evalSol -= annulerLivraison(reste[i]);
+			}
+		}
+	} else {
+		cout << "STOP : ";
+
+		if (evalSol >= evalBestSol) {
+			cout << "evalSol=" << evalSol << " >= evalBestSol=" << evalBestSol;
+			cout << endl;
+		}
+
+		if (!encorePossible(reste)) {
+			cout << "Ce chemin mène vers une impasse" << endl;
 		}
 	}
-
 }
 
-/* Cette fonction prend en paramètre une liste de produits, et retourne le produit qui a la date due min parmis toute cette liste */
-
-Produit* Probleme::produitDueMin(vector<Produit*> &prods){
-
-	Produit *prodMin = prods[0];
-	int i;
-
-	for(i=0;i<prods.size();++i){
-		if(prods[i]->getDateDue() < prodMin->getDateDue()){
-			prodMin = prods[i];
+bool Probleme::encorePossible(vector<Batch*> reste) {
+	for (int i = 0; i < reste.size(); ++i) {
+		if (reste[i]->dateDueGlobale() < // dateCourante) {
+						dateCourante + reste[i]->getClient()->getDist()) {
+			
+			return false;
 		}
 	}
-
-	return prodMin;
+	return true;
 }
 
-/* Retourne le produit qui a la date due la plus faible, parmis les produits commandés par le client c */
+// ------
 
-Produit* Probleme::produitDueMinClient(vector<Produit*> prods, Client* cli){
+// /* /!\ FONCTION A AMELIORER /!\ Est-il possible de trouver directement les bons batches, sans entrer dans l'arborescence ?
+//  *
+//  * Construit la liste des batches en fonction de la liste des produits
+//  * Les batches sont construits de la manière suivante :
+//  *  - si les produits sont une date due dont la différence entre avec celle qui est minimale parmis ces produits est < à 2* la distance client/entrepôt
+//  */
 
-	vector<Produit*> tempProds;
-	int i;
+// void Probleme::build_batches(){
 
-	for(i=0;i<prods.size();++i){
-		if(prods[i]->getClient()->getNum() == cli->getNum()){
-			tempProds.push_back(prods[i]);
-		}
-	}
+// 	int i;
+// 	vector<Produit*> tempProduits = this->produits; // On va créer une liste temporaire : On va supprimer les produits à mesures qu'ils sont assignés à des bacs
+// 	int k=0;
+// 	bool trouve;
+// 	int tempDueMin;
+// 	Produit* tempProd;
+// 	Client* tempClient;
+// 	vector<Produit*>::iterator it;
 
-    if(tempProds.size() > 0){ // Vérification nécessaire pour éviter la segfault dans produitDueMin
-        return produitDueMin(tempProds);
-    } else {
-        return NULL;
-    }
-}
+// 	while(tempProduits.size() > 0){
 
-void Probleme::printBatches(){
+// 		this->batches.push_back(new Batch());
 
-	int i;
+// 		tempProd = produitDueMin(tempProduits);
+// 		tempClient = tempProd->getClient(); /* On enregistre le client, puisque tous les autres produits du batch seront aussi pour ce client */
+// 		tempDueMin = tempProd->getDateDue();
 
-	for(i=0;i<batches.size();++i){
-        batches[i]->printBatch();
-	}
-}
+// 		this->batches[k]->addProduit(tempProd);
 
-/* Cette fonction créé une solution avec l'heuristique suivante :
- *      - trouver le batch avec la somme des dates dues * le coût unitaire  le plus petit
- *      - regarder si ce batch compromet la livraison des autres (= si on livre ce batch, peut-on respecter la livraison a temps des autres ?)
- *      - si ce batch n'est pas compromettant, on le livre, sinon, on livre le batch le plus urgent (date due la plus faible)
- *
- *      NOTE : CET HEURISTIQUE N'EST PEUT-ETRE PAS VIABLE SELON LES CONFIGURATIONS : mettre en backup l'heuristique "livraison par date due minimum
- *      croissante" ?
- */
+// 		eraseProduit(tempProduits,tempProd);
 
-float Probleme::solution_heuristique(){
+// 		if(tempProduits.size() > 0){
+//             trouve = true;
+// 			while(this->batches[k]->getBatchSize() < c && trouve == true){
+//                 trouve = false;
+// 				// On cherche un produit dont la date due est <= tempDueMin + distance client/entrepot*2
+// 				tempProd = produitDueMinClient(tempProduits,tempClient);
+// 				if(tempProd != NULL){
+//                     if(tempProd->getDateDue() < tempDueMin + (tempClient->getDist()*2)){
+//                         this->batches[k]->addProduit(tempProd);
+//                         eraseProduit(tempProduits,tempProd);
+//                         trouve = true;
+//                     }
+// 				}
+// 			}
+// 		}
 
-    vector<Batch*> tempBatches = this->batches;
-    Batch* tempBatch;
-    vector<int> solution;
-    int time = 0;
-    float totalCost = 0;
+// 		++k;
+// 	}
+// }
 
-    while(tempBatches.size() > 0){
-        solution.push_back(0); // 0 est l'entrepôt
 
-        tempBatch = batchEvalCoutMin(tempBatches);
+// /* Ecrase le produit p dans la liste de produits prods */
 
-        if(estCompromettant(tempBatches,tempBatch,time)){
-            tempBatch = batchDueMin(tempBatches);
-        }
+// void Probleme::eraseProduit(vector<Produit*> &prods, Produit* p){
+// 	vector<Produit*>::iterator it;
 
-        solution.push_back(tempBatch->getBatchClient()->getNum());
+// 	for(it = prods.begin();it != prods.end();++it){
+// 		if(*it == p){
+// 			prods.erase(it);
+// 			break;
+// 		}
+// 	}
 
-        totalCost += batchCost(tempBatch,time);
+// }
 
-        eraseBatch(tempBatches,tempBatch); // le batch a été livré, on le supprime de la liste de batches à livrer
-    }
+// /* Cette fonction prend en paramètre une liste de produits, et retourne le produit qui a la date due min parmis toute cette liste */
 
-    solution.push_back(0); // retour final à l'entrpôt
+// Produit* Probleme::produitDueMin(vector<Produit*> &prods){
 
-    this->bestSol = solution;
-    this->eval_bestSol = totalCost;
+// 	Produit *prodMin = prods[0];
+// 	int i;
 
-    return totalCost;
-}
+// 	for(i=0;i<prods.size();++i){
+// 		if(prods[i]->getDateDue() < prodMin->getDateDue()){
+// 			prodMin = prods[i];
+// 		}
+// 	}
 
-/* CETTE FONCTION HEURISTIQUE EST MOINS EFFICACE, MAIS FONCTIONNE A TOUS LES COUPS
+// 	return prodMin;
+// }
 
-float Probleme::solution_heuristique(){
+// /* Retourne le produit qui a la date due la plus faible, parmis les produits commandés par le client c */
 
-    vector<Batch*> tempBatches = this->batches;
-    Batch* tempBatch;
-    vector<int> solution;
-    int time = 0;
-    float totalCost = 0;
+// Produit* Probleme::produitDueMinClient(vector<Produit*> prods, Client* cli){
 
-    while(tempBatches.size() > 0){
-        solution.push_back(0); // 0 est l'entrepôt
+// 	vector<Produit*> tempProds;
+// 	int i;
 
-        tempBatch = batchDueMin(tempBatches);
+// 	for(i=0;i<prods.size();++i){
+// 		if(prods[i]->getClient()->getNum() == cli->getNum()){
+// 			tempProds.push_back(prods[i]);
+// 		}
+// 	}
 
-        solution.push_back(tempBatch->getBatchClient()->getNum());
+//     if(tempProds.size() > 0){ // Vérification nécessaire pour éviter la segfault dans produitDueMin
+//         return produitDueMin(tempProds);
+//     } else {
+//         return NULL;
+//     }
+// }
 
-        totalCost += batchCost(tempBatch,time);
+// float Probleme::solution_heuristique(){
 
-        eraseBatch(tempBatches,tempBatch); // le batch a été livré, on le supprime de la liste de batches à livrer
-    }
+//     vector<Batch*> tempBatches = this->batches;
+//     Batch* tempBatch;
+//     vector<int> solution;
+//     int time = 0;
+//     float totalCost = 0;
 
-    solution.push_back(0); // retour final à l'entrpôt
+//     while(tempBatches.size() > 0){
+//         solution.push_back(0); // 0 est l'entrepôt
 
-    this->bestSol = solution;
-    this->eval_bestSol = totalCost;
+//         tempBatch = batchEvalCoutMin(tempBatches);
 
-    return totalCost;
-} */
+//         if(estCompromettant(tempBatches,tempBatch,time)){
+//             tempBatch = batchDueMin(tempBatches);
+//         }
 
-/* Cette fonction retourne le batch qui est évalué comme le moins coûteux de livrer (parmis une liste de batches), sans information de temps */
-Batch* Probleme::batchEvalCoutMin(vector<Batch*> &bs){
-    int i;
-    Batch* best = bs[0];
+//         solution.push_back(tempBatch->getBatchClient()->getNum());
 
-    for(i=1;i<bs.size();++i){
-        if(bs[i]->dateDueBatch()*bs[i]->getBatchClient()->getCoutUnitaireStockage() < best->dateDueBatch()*best->getBatchClient()->getCoutUnitaireStockage()){
-            best = bs[i];
-        }
-    }
-    return best;
-}
+//         totalCost += batchCost(tempBatch,time);
 
-/* Retourne le batch qui contient le produit à la date due la plus faible, parmis une liste de batches */
+//         eraseBatch(tempBatches,tempBatch); // le batch a été livré, on le supprime de la liste de batches à livrer
+//     }
 
-Batch* Probleme::batchDueMin(vector<Batch*> &bs){
+//     solution.push_back(0); // retour final à l'entrpôt
 
-    Batch* batchMin = bs[0];
-    int i;
+//     this->bestSol = solution;
+//     this->eval_bestSol = totalCost;
 
-    for(i=1;i<bs.size();++i){
-        if(bs[i]->getDueMin() < batchMin->getDueMin()){
-            batchMin = bs[i];
-        }
-    }
+//     return totalCost;
+// }
 
-    return batchMin;
-}
+// /* CETTE FONCTION HEURISTIQUE EST MOINS EFFICACE, MAIS FONCTIONNE A TOUS LES COUPS
 
-/* Cette méthode calcule le coût de la livraison d'un batch à un temps "time".
- * Ce coût comporte :
- *  - Les coûts de transport aller/retour (distance entrepot/client * eta * 2)
- *  - Les coûts de stockage (cout_u *(date_due - time) pour chaque produit)
- *
- * Note : la variable time est passée par référence, et modifiée au cours de ce calcul */
+// float Probleme::solution_heuristique(){
 
-float Probleme::batchCost(Batch* b, int &time){
+//     vector<Batch*> tempBatches = this->batches;
+//     Batch* tempBatch;
+//     vector<int> solution;
+//     int time = 0;
+//     float totalCost = 0;
 
-    float cost = 0;
-    int i;
-    float cu = b->getBatchClient()->getCoutUnitaireStockage();
+//     while(tempBatches.size() > 0){
+//         solution.push_back(0); // 0 est l'entrepôt
 
-    cost += b->getBatchClient()->getDist()*this->eta;
-    time += b->getBatchClient()->getDist();
+//         tempBatch = batchDueMin(tempBatches);
 
-    for(i=0;i<b->getBatch().size();++i){
-        int dateDue = b->getBatch()[i]->getDateDue();
-        cost += cu *(dateDue - time);
-    }
+//         solution.push_back(tempBatch->getBatchClient()->getNum());
 
-    cost += b->getBatchClient()->getDist()*this->eta;
-    time += b->getBatchClient()->getDist();
+//         totalCost += batchCost(tempBatch,time);
 
-    return cost;
-}
+//         eraseBatch(tempBatches,tempBatch); // le batch a été livré, on le supprime de la liste de batches à livrer
+//     }
 
-/* Efface le batch d'une liste de batches */
+//     solution.push_back(0); // retour final à l'entrpôt
 
-void Probleme::eraseBatch(vector<Batch*> &bs, Batch* b){
-    vector<Batch*>::iterator it;
+//     this->bestSol = solution;
+//     this->eval_bestSol = totalCost;
 
-    for(it=bs.begin();it!=bs.end();++it){
-        if(*it == b){
-            bs.erase(it);
-            break;
-        }
-    }
-}
+//     return totalCost;
+// } */
 
-/* Affiche la meilleure solution trouvee jusqu'a present */
-void Probleme::printBestSol(){
-    int i;
-    cout<<"______________________________________________________\n";
-    cout<<"Meilleure solution trouvee :\n\t";
-    for(i=0;i<bestSol.size()-1;++i){
-        cout<<bestSol[i]<<"--->";
-    }
-    cout<<"0\n\n";	// A la fin, on revient chez le fournisseur
-    cout<<"Evaluation de cette solution : "<<eval_bestSol<<"\n";
-    cout<<"______________________________________________________\n";
-}
+// /* Cette fonction retourne le batch qui est évalué comme le moins coûteux de livrer (parmis une liste de batches), sans information de temps */
+// Batch* Probleme::batchEvalCoutMin(vector<Batch*> &bs){
+//     int i;
+//     Batch* best = bs[0];
 
-/* Cette fonction regarde si le batch b est compromettant pour les autres (= si sa livraison compromet la livraison à temps d'un autre batch) */
+//     for(i=1;i<bs.size();++i){
+//         if(bs[i]->dateDueBatch()*bs[i]->getBatchClient()->getCoutUnitaireStockage() < best->dateDueBatch()*best->getBatchClient()->getCoutUnitaireStockage()){
+//             best = bs[i];
+//         }
+//     }
+//     return best;
+// }
 
-bool Probleme::estCompromettant(vector<Batch*> &bs,Batch* b, int time){
+// /* Retourne le batch qui contient le produit à la date due la plus faible, parmis une liste de batches */
 
-    int i;
-    int tempsLivraison = (b->getBatchClient()->getDist()*2); // temps qu'il faut pour livrer ce batch
+// Batch* Probleme::batchDueMin(vector<Batch*> &bs){
 
-    for(i=0;i<bs.size();++i){
-        if(bs[i]->getDueMin() < (time + tempsLivraison + bs[i]->getBatchClient()->getDist())){
-            return true;
-        }
-    }
+//     Batch* batchMin = bs[0];
+//     int i;
 
-    return false;
-}
+//     for(i=1;i<bs.size();++i){
+//         if(bs[i]->getDueMin() < batchMin->getDueMin()){
+//             batchMin = bs[i];
+//         }
+//     }
 
-void Probleme::setNbProduits(int nb){
-    n = nb;
-}
+//     return batchMin;
+// }
 
-void Probleme::setNbClients(int nb){
-    m = nb;
-}
+// /* Cette méthode calcule le coût de la livraison d'un batch à un temps "time".
+//  * Ce coût comporte :
+//  *  - Les coûts de transport aller/retour (distance entrepot/client * eta * 2)
+//  *  - Les coûts de stockage (cout_u *(date_due - time) pour chaque produit)
+//  *
+//  * Note : la variable time est passée par référence, et modifiée au cours de ce calcul */
 
-void Probleme::setCapacite(int cap){
-    c = cap;
-}
+// float Probleme::batchCost(Batch* b, int &time){
 
-void Probleme::setCoutTransport(float cout_t){
-    eta = cout_t;
-}
+//     float cost = 0;
+//     int i;
+//     float cu = b->getBatchClient()->getCoutUnitaireStockage();
 
-void Probleme::setClients(vector<Client*> cl){
-    clients = cl;
-}
+//     cost += b->getBatchClient()->getDist()*this->eta;
+//     time += b->getBatchClient()->getDist();
 
-void Probleme::setProduits(vector<Produit*> pl){
-    produits = pl;
-}
+//     for(i=0;i<b->getBatch().size();++i){
+//         int dateDue = b->getBatch()[i]->getDateDue();
+//         cost += cu *(dateDue - time);
+//     }
+
+//     cost += b->getBatchClient()->getDist()*this->eta;
+//     time += b->getBatchClient()->getDist();
+
+//     return cost;
+// }
+
+// /* Efface le batch d'une liste de batches */
+
+// void Probleme::eraseBatch(vector<Batch*> &bs, Batch* b){
+//     vector<Batch*>::iterator it;
+
+//     for(it=bs.begin();it!=bs.end();++it){
+//         if(*it == b){
+//             bs.erase(it);
+//             break;
+//         }
+//     }
+// }
+
+
+// /* Cette fonction regarde si le batch b est compromettant pour les autres (= si sa livraison compromet la livraison à temps d'un autre batch) */
+
+// bool Probleme::estCompromettant(vector<Batch*> &bs,Batch* b, int time){
+
+//     int i;
+//     int tempsLivraison = (b->getBatchClient()->getDist()*2); // temps qu'il faut pour livrer ce batch
+
+//     for(i=0;i<bs.size();++i){
+//         if(bs[i]->getDueMin() < (time + tempsLivraison + bs[i]->getBatchClient()->getDist())){
+//             return true;
+//         }
+//     }
+
+//     return false;
+// }
 

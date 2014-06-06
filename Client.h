@@ -4,14 +4,14 @@
 class Client {
 	private:
 		int h;				// N° du client
-		float dist;			// Distance entrepôt/client (en unité de temps)
-		double cout_u;			// Coût de stockage unitaire chez le client h
-		bool fini;			// Est-ce que le client a fini d'être livré ?
+		float dist;			// Distance entrepôt <-> client
+		float cout;			// Coût de stockage unitaire chez le client #h
 
 	public:
-		Client(int, double, float);
-		float getCoutUnitaireStockage();
-		int getDist();
+		Client(int _h, float _dist, float _cout);
+		~Client(){};
+		float coutUnitaireStockage();
+		float getDist();
 		int getNum();
 };
 

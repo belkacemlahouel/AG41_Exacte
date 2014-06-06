@@ -1,24 +1,20 @@
 #include "Client.h"
 
-// Client(numéro de client, coût unitaire de stockage, distance au fournisseur)
-Client::Client(int h, double cout_u, float dist) {
-	fini = false;
-	this->h = h;
-	this->cout_u = cout_u;
-	this->dist = dist;
+Client::Client(int _h, float _dist, float _cout) {
+	h = _h;
+	dist = _dist;
+	cout = _cout;
 }
 
-// Renvoie le coût unitaire de stockage pour ce client
-float Client::getCoutUnitaireStockage() {
-	return cout_u;
+float Client::coutUnitaireStockage() {
+	return cout;
 }
 
-// Renvoie la distance au fournisseur
-int Client::getDist(){
-    return this->dist;
+float Client::getDist() {
+	return dist;
 }
 
-// Renvoie le numéro de client
-int Client::getNum(){
-    return this->h;
+int Client::getNum() {
+	return h;
 }
+

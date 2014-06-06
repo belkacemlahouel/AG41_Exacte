@@ -1,40 +1,15 @@
-Solution exacte pour le challenge d'AG41 (Optimisation et Recherche Opérationnelle).
+Challenge d'AG41 (Optimisation et Recherche opérationnelle).
+Université de Technologie de Belfort-Montbéliard (UTBM)
+2014
 
-UTBM (Université de Technologie de Belfort-Montbéliard).
+Solution Exacte
 
-Pour plus d'informations, consultez le fichier PDF "ag41-challenge2014.pdf"
+Belkacem LAHOUEL, Luc CADORET
 
-Belkacem Lahouel, Luc Cadoret, 2014.
+------------------------------------------------- TODO
 
-#####################################################################
-
-Structures de données :
-
-Produit {
-
-	int dateDue;
-	Client demandeur; (a changer plus tard ?)
-	
-}
-
-Batch {
-	Vector<produit> batch;
-	
-	dateDueBatch(); // donne la date due de l'ensemble du batch 
-}
-
-Client {
-	int distEntrepot;
-	int coutStockage;
-	
-}
-
-Probleme {
-
-	Vector<Client>
-	Vector<Batch>
-	Vector<Produit>
-	
-	Toutes les données du problème (n, m, eta, c)
-
-}
+Ajouter les heuristiques pour cut
+Tester le parseur
+Ajouter les implémentations des tris pour les batchs...
+Ajouter les threads ?
+Ajouter une notion de coût pour préparer les batchs

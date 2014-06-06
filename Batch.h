@@ -10,21 +10,22 @@ using namespace std;
 class Batch{
 
 	private:
-		vector<Produit*> batch;
+		vector<Produit*> produits;
 
 	public:
-		Batch(){}
+		Batch(Produit*);
 		~Batch(){}
-		void addProduit(Produit*);
-		int dateDueBatch();
-		int getBatchSize();
-        void printBatch();
-        int getDueMin();
-        vector<Produit*> getBatch();
-        Client* getBatchClient();
+		void printBatch();
 
-        int coutStockage(int);
-        int sommeAvancesDueMin();
+		void addProduit(Produit*);
+		float dateDueGlobale();
+		int size();
+
+        vector<Produit*> getProduits();
+        Client* getClient();
+
+        float coutStockage(int date);
+        float sommeAvancesMin();
 };
 
-#endif // BATCH
+#endif // __BATCH__
