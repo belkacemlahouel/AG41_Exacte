@@ -27,13 +27,15 @@ private:
     float dateCourante;				// Date courante lors du calcul
     
     // --- Méthodes privées, résolution principalement
-    void solve(int iter, vector<Batch*> reste);
+    // void solve(int iter, vector<Batch*> reste);
     void solutionHeuristique();
     void init(int capa, float eta, vector<Client*>, vector<Produit*>);
     bool encorePossible(vector<Batch*> reste);
     float livraison(Batch*);		// Renvoient le coût de cette livraison
     float annulerLivraison(Batch*); // et avancent (ou reculent) la date
-    void buildBatchs();
+    // void buildBatchs();
+    void solve(vector<Batch*> cur, vector<Produit*> reste);
+    float evaluerSolution(vector<Batch*>);
     
 public:
     Probleme2();
