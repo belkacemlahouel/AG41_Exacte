@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include "Probleme.h"
+#include "Probleme2.h"
 #include "Produit.h"
 #include "Batch.h"
 
@@ -29,6 +29,14 @@ class Tools {
 			// cout << "batchptr comparator" << endl;
 			return b1->dateDueGlobale() < b2->dateDueGlobale();
 		};
+    
+        static bool comparatorProduitPtrDateDueDec(Produit* p1, Produit* p2) {
+            return !comparatorProduitPtrDateDue(p1, p2);
+        };
+    
+        static bool comparatorBatchPtrDateDueDec(Batch* b1, Batch* b2) {
+            return !comparatorBatchPtrDateDue(b1, b2);
+        };
 };
 
 #endif // __TOOLS__

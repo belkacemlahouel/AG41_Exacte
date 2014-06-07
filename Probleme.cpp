@@ -202,6 +202,7 @@ void Probleme::solve(int iter, vector<Batch*> reste) {
 		if (iter == batchs.size()-1 && reste.size() == 1) {
 			sol[iter] = reste[0];
 			evalSol += livraison(reste[0]);
+            printSol(iter);
 
 			if (evalSol < evalBestSol) {
 				cout << "Une meilleure solution est trouvée" << endl;

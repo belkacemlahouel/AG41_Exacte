@@ -8,8 +8,15 @@ Belkacem LAHOUEL, Luc CADORET
 
 ------------------------------------------------- TODO
 
-Ajouter les heuristiques pour cut
-Tester le parseur
-Ajouter les implémentations des tris pour les batchs...
+Ajouter les heuristiques pour cut (Plusieurs ?)
+Tester le parseur (/!\ bugs sur les derniers fichiers ?) 	<—————=
+Ajouter les implémentations des tris pour les batchs...  	(OK)
 Ajouter les threads ?
-Ajouter une notion de coût pour préparer les batchs
+Ajouter une notion de coût pour préparer les batchs ?
+
+------------------------------------------------- Màj
+
+Au lieu d’ajouter les produits/batchs à la fin			<—————=
+	On pourrait les ajouter en début ?
+	hp : produits triés ASC(dates) dans instances
+

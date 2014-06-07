@@ -1,4 +1,4 @@
-#include "Probleme.h"
+#include "Probleme2.h"
 #include "Parser.h"
 
 int main(int argc, char** argv) {
@@ -26,12 +26,12 @@ int main(int argc, char** argv) {
     
     cout << "----- Hello World! -----" << endl;
     
-    Probleme* p = NULL;
+    Probleme2* p = NULL;
     
     if (argc == 2) {
-        p = new Probleme(argv[1]);
+        p = new Probleme2(argv[1]);
     } else {
-        p = new Probleme();
+        p = new Probleme2();
     }
     
     p->printBatchs();
