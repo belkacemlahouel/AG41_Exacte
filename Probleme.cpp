@@ -1,6 +1,6 @@
 #include "Probleme.h"
 
-Probleme::Probleme(int _capa, float _eta, vector<Client*> _clients,
+void Probleme::init(int _capa, float _eta, vector<Client*> _clients,
 											vector<Produit*> _produits) {
 	capa = _capa;
 	eta = _eta;
@@ -14,6 +14,12 @@ Probleme::Probleme(int _capa, float _eta, vector<Client*> _clients,
 	evalBestSol = 0;
 
 	dateCourante = 0.0f;
+}
+
+// Instance avec appel parseur
+Probleme::Probleme(string filename) {
+    Parser r(filename);
+    init(r.getCapa(), r.getEta(), r.getClients(), r.getProduits());
 }
 
 // Instance de base, voir sujet
@@ -51,20 +57,12 @@ Probleme::Probleme() {
 }
 
 Probleme::~Probleme() {
-	// Tools::viderVector(clients);
-	// Tools::viderVector(produits);
-	// Supprimés par le Parseur...
+	Tools::viderVector(clients);
+	Tools::viderVector(produits);
 
 	Tools::viderVector(batchs);
 }
 
-// --> tools
-// template<class T> void Probleme::viderVector(vector<T> vect) {
-// 	while (vect.size() > 0) {
-// 		delete vect[0];
-// 		vect.erase(vect.begin());
-// 	}
-// }
 
 // Batchs faits "bêtement" ici...
 void Probleme::buildBatchs() {

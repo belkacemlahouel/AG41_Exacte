@@ -5,8 +5,8 @@ Parser::Parser(string filename){
 }
 
 Parser::~Parser() {
-	Tools::viderVector(clients);
-	Tools::viderVector(produits);
+//	Tools::viderVector(clients);
+//	Tools::viderVector(produits);
 }
 
 void Parser::parseFile(string name){

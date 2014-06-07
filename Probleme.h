@@ -2,6 +2,7 @@
 #define __PROBLEME__
 
 #include "Tools.h"
+#include "Parser.h"
 #include "Batch.h"
 #include <algorithm>
 
@@ -27,12 +28,12 @@ class Probleme {
 
 		// --- Méthodes privées
 		void solve(int iter, vector<Batch*> reste);
-		// template<class T> void viderVector(vector<T>); // --> tools
         void solutionHeuristique();
+        void init(int capa, float eta, vector<Client*>, vector<Produit*>);
 
 	public:
-		Probleme(int capa, float eta, vector<Client*>, vector<Produit*>);
 		Probleme();
+        Probleme(string filename);
 		~Probleme();
 
 		void buildBatchs();
