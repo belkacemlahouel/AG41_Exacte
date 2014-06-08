@@ -195,6 +195,9 @@ bool Probleme2::encorePossible(vector<Batch*> reste) {
 // Avec cette méthode, nous avancons dans le temps
 float Probleme2::livraison(Batch* b) {
 	float rep = b->getClient()->getDist() * 2*eta;
+    // cout << "Cout de livraison client " << b->getClient()->getNum();
+    // cout << " : " << rep << endl;
+    
 	dateCourante += b->getClient()->getDist();
 	rep += b->coutStockage(dateCourante);
 	dateCourante += b->getClient()->getDist();

@@ -76,7 +76,7 @@ void Parser::parseFile(string name){
 
                 cout<<"Nouveau Client. ID : "<< tempIndex <<"\n\tCout stockage : "<< tempCout <<"\n\tDistance client-entrepot : "<< tempDist <<"\n";
 
-                clients.push_back(new Client(tempIndex,tempCout,tempDist));
+                clients.push_back(new Client(tempIndex,tempDist,tempCout));
                 ++m;
 
 			} else if(strcmp(desc.c_str(),"JOB_CUSTOMER") == 0){
