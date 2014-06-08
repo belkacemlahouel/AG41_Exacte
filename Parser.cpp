@@ -88,10 +88,12 @@ void Parser::parseFile(string name){
                 char* temp;
 
                 temp = strtok (buff,";");
-                while (temp != NULL)
+                int k = 0;
+                while (temp != NULL && k < n)
                 {
                     tempJobList.push_back(atoi(temp));
                     temp = strtok (NULL, ";");
+                    ++k;
                 }
 
                 cout << "Liste des jobs obtenue : ";
@@ -112,10 +114,12 @@ void Parser::parseFile(string name){
                 char* temp;
 
                 temp = strtok (buff,";");
-                while (temp != NULL)
+                int k = 0;
+                while (temp != NULL && k < n)
                 {
                     tempDatesList.push_back(atof(temp));
                     temp = strtok (NULL, ";");
+                    ++k;
                 }
 
                 cout << "Liste des dates des jobs obtenue : ";
