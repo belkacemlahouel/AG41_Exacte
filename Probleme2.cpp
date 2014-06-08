@@ -142,15 +142,27 @@ void Probleme2::solve(vector<Batch*> cur, vector<Produit*> res) {
         
         for (int i = 0; b && i < res.size(); ++i) {
             if (tmp->getClient()->getNum() == res[i]->getClient()->getNum()) {
+                cout << "Même client" << endl;
                 if (dateCourante - res[i]->dateDue() >
                                     res[i]->getClient()->getDist()) {
-                    b = false;
+                    // On ne doit pas l'ajouter, mais on ferait bien
+                    // de vérifier si on peut, amélioration...
+                    // Stocker revient moins cher qu'un AR ?
+                    cout << "VRAI1";
+                    if (livraisonImmediate(res[i])) {
+                        cout << "VRAI";
+                        tmp->addProduit(res[i]);
+                        res.erase(res.begin()+i);
+                    } else {
+                        b = false;
+                    }
+                    cout << endl;
                 } else {
                     // avant de l'ajouter, vérifier si cela vaut le coût...
                     tmp->addProduit(res[i]);
                     res.erase(res.begin()+i);
                 }
-            }
+            } else cout << "Pas même client" << endl;
         }
         
         if (f) {
@@ -222,4 +234,41 @@ float Probleme2::evaluerSolution(vector<Batch*> s) {
     }
     return ev;
 }
+
+// True si on devrait livrer ce produit tout de suite
+// False sinon, et on devrait plutôt livrer au moins après un AR
+// On suppose que le produit peut attendre un AR
+// ATTENTION, ON NE TIENT PAS COMPTE DE L'AVANCE QU'ON DEVRA PRENDRE
+//      SUR LES AUTRES PRODUITS A CAUSE DE CELUI LA... REVOIR
+bool Probleme2::livraisonImmediate(Produit* p) {
+    // On calcule le coût de la livraison tout de suite, pour ce produit
+    // Cela inclut aussi les stockages
+    float maintenant = 0;
+    
+    dateCourante += p->getClient()->getDist();      // Aller
+    
+    maintenant = p->coutStockage(dateCourante);     // On livre
+    
+    dateCourante += p->getClient()->getDist()*2;    // Retour puis re-aller
+    
+    // Alternative, on livre dans un AR
+    // Du coup, on fait un AR rien que pour ce produit
+    float apres = 0;
+    
+    apres = p->coutStockage(dateCourante);          // On livre
+    apres += eta*p->getClient()->getDist()*2;       // AR en plus
+    
+    dateCourante -= p->getClient()->getDist()*3;
+    
+    // Et malgré tout, on préfère livrer immédiatement, si c'est le même coût
+    return (maintenant > apres);
+}
+
+
+
+
+
+
+
+
 

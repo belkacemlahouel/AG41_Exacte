@@ -34,6 +34,7 @@ private:
     // void buildBatchs();
     void solve(vector<Batch*> cur, vector<Produit*> reste);
     float evaluerSolution(vector<Batch*>);
+    bool livraisonImmediate(Produit*);
 
 public:
     Probleme2();
