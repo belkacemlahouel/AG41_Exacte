@@ -1,5 +1,4 @@
 #include "Probleme2.h"
-#include "Parser.h"
 
 int main(int argc, char** argv) {
 //	if (argc == 2) {
@@ -23,21 +22,21 @@ int main(int argc, char** argv) {
 //	} else {
 //		cout << "Mauvais paramètres - ERREUR" << endl;
 //	}
-    
+
     cout << "----- Hello World! -----" << endl;
-    
+
     Probleme2* p = NULL;
-    
+
     if (argc == 2) {
         p = new Probleme2(argv[1]);
     } else {
         p = new Probleme2();
     }
-    
+
     p->printBatchs();
     p->solve();
     p->printBestSol();
-    
+
     delete(p);
     cout << "------ Bye World! ------" << endl;
     return 0;

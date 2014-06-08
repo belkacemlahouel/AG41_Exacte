@@ -9,7 +9,6 @@
 #include <vector>
 #include <iomanip>
 #include <list>
-#include "Probleme2.h"
 #include "Tools.h"
 
 using namespace std;
