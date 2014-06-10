@@ -4,15 +4,15 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
                          vector<Produit*> _produits) {
 	capa = _capa;
 	eta = _eta;
-    
+
 	clients = _clients;
 	produits = _produits;
-    
+
 //	buildBatchs();
-    
+
 	evalSol = 0;
 	evalBestSol = 0;
-    
+
 	dateCourante = 0.0f;
 }
 
@@ -26,33 +26,33 @@ Probleme2::Probleme2(string filename) {
 Probleme2::Probleme2() {
 	capa = 5;
 	eta = 2;
-    
+
 	// Création des clients
 	clients.push_back(new Client(1, 100, 3/2.));
 	clients.push_back(new Client(2, 100, 3));
 	clients.push_back(new Client(3, 100, 9/2.));
 	clients.push_back(new Client(4, 100, 6));
-    
+
 	// Création des produits, dans le désordre exprès
 	produits.push_back(new Produit(1, 310, clients[0]));
 	produits.push_back(new Produit(2, 310, clients[0]));
 	produits.push_back(new Produit(3, 300, clients[2]));
 	produits.push_back(new Produit(4, 360, clients[2]));
 	produits.push_back(new Produit(5, 400, clients[2]));
-    
+
 	// construction des batchs
 	// buildBatchs();
-    
+
 	// initialisation des évaluations
 	evalSol = 0;
 	evalBestSol = 0;
-    
+
 	// initialisation des solutions
 	sol = batchs;
 	bestSol = batchs;
-    
+
 	dateCourante = 0;
-    
+
 	cout << "Initialisation instance de test OK\n";
 }
 
@@ -112,7 +112,7 @@ void Probleme2::solve() {
     // On trie les produits par ordre décroissant des dates dues
     sort(produits.begin(), produits.end(),
          Tools::comparatorProduitPtrDateDueDec);
-    
+
     // Heuristique
     solutionHeuristique();
 
@@ -120,7 +120,7 @@ void Probleme2::solve() {
     vector<Batch*> cur(0);
     vector<Produit*> res = produits;
     solve(cur, res);
-    
+
 //    for (int i = 0; i < bestSol.size(); ++i) {
 //        bestSol[i]->printBatch();
 //    }
@@ -130,21 +130,21 @@ void Probleme2::solve() {
 // Solution itérative... pour le moment !
 void Probleme2::solve(vector<Batch*> cur, vector<Produit*> res) {
     bool f = true; // Pour voir comment on initialise la date courante
-    
+
     while (res.size() > 0) {
         Batch* tmp = new Batch(res[0]);
         res.erase(res.begin());
-        
+
         bool b = true;
         // b : est-ce qu'on doit continuer à chercher
         //      si d'autres éléments doivent être ajoutés au batch
         //      pour le même client, en supposant un tri DEC sur les dates dues
-        
+
         for (int i = 0; b && i < res.size(); ++i) {
             if (tmp->getClient()->getNum() == res[i]->getClient()->getNum()) {
                 cout << "Même client" << endl;
-                if (dateCourante - res[i]->dateDue() >
-                                    res[i]->getClient()->getDist()) {
+                if (dateCourante - res[i]->dateDue() >                /// la première fois qu'on passe ici, dateCourante = 0 ?
+                                    res[i]->getClient()->getDist()) { /// getDist*2 ?
                     // On ne doit pas l'ajouter, mais on ferait bien
                     // de vérifier si on peut, amélioration...
                     // Stocker revient moins cher qu'un AR ?
@@ -164,7 +164,7 @@ void Probleme2::solve(vector<Batch*> cur, vector<Produit*> res) {
                 }
             } else cout << "Pas même client" << endl;
         }
-        
+
         if (f) {
             dateCourante = tmp->dateDueGlobale()-tmp->getClient()->getDist();
             f = false;
@@ -172,16 +172,16 @@ void Probleme2::solve(vector<Batch*> cur, vector<Produit*> res) {
             dateCourante = min(dateCourante-tmp->getClient()->getDist()*2,
                            tmp->dateDueGlobale()-tmp->getClient()->getDist()*2);
         }
-        
+
         cout << "Date courante : " << dateCourante << endl;
         tmp->printBatch();
         cur.push_back(tmp);
     }
-    
+
     // On renverse l'ordre des batchs
     // (ils sont du dernier à livrer au premier là)
     reverse(cur.begin(), cur.end());
-    
+
     evalBestSol = evaluerSolution(cur);
     bestSol = cur;
 }
@@ -206,12 +206,16 @@ bool Probleme2::encorePossible(vector<Batch*> reste) {
 // Livraison et annulation de livraison (incluent chgts temporels)
 // Avec cette méthode, nous avancons dans le temps
 float Probleme2::livraison(Batch* b) {
+    /* rep est le coût de livraison + stockage du batch */
 	float rep = b->getClient()->getDist() * 2*eta;
     // cout << "Cout de livraison client " << b->getClient()->getNum();
     // cout << " : " << rep << endl;
-    
+
 	dateCourante += b->getClient()->getDist();
 	rep += b->coutStockage(dateCourante);
+
+	cout<<"Batch pour client "<<b->getProduits()[0]->getClient()->getNum()<<", Date : "<<dateCourante<<"/"<<b->dateDueGlobale()<<endl;
+
 	dateCourante += b->getClient()->getDist();
 	return rep;
 }
@@ -228,6 +232,7 @@ float Probleme2::annulerLivraison(Batch* b) {
 // On suppose qu'on commence à la bonne date, et les batchs sont corrects
 float Probleme2::evaluerSolution(vector<Batch*> s) {
     cout << "Evaluation solution, dateCourante = " << dateCourante << endl;
+    cout << "Detail de la solution :\n";
     float ev = 0;
     for (int i = 0; i < s.size(); ++i) {
         ev += livraison(s[i]);
@@ -244,22 +249,22 @@ bool Probleme2::livraisonImmediate(Produit* p) {
     // On calcule le coût de la livraison tout de suite, pour ce produit
     // Cela inclut aussi les stockages
     float maintenant = 0;
-    
+
     dateCourante += p->getClient()->getDist();      // Aller
-    
+
     maintenant = p->coutStockage(dateCourante);     // On livre
-    
+
     dateCourante += p->getClient()->getDist()*2;    // Retour puis re-aller
-    
+
     // Alternative, on livre dans un AR
     // Du coup, on fait un AR rien que pour ce produit
     float apres = 0;
-    
+
     apres = p->coutStockage(dateCourante);          // On livre
     apres += eta*p->getClient()->getDist()*2;       // AR en plus
-    
+
     dateCourante -= p->getClient()->getDist()*3;
-    
+
     // Et malgré tout, on préfère livrer immédiatement, si c'est le même coût
     return (maintenant > apres);
 }

@@ -21,8 +21,9 @@ void Batch::addProduit(Produit* p) {
 	produits.push_back(p);
 }
 
+/* la date due globale est la date due minimum entre toutes les dates dues de tous les jobs du batch */
 float Batch::dateDueGlobale() {
-	int min = produits[0]->dateDue();
+	float min = produits[0]->dateDue();
     int i;
 
     for(i = 1; i < size(); ++i) {
