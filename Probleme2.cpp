@@ -94,12 +94,32 @@ void Probleme2::printBatchs(vector<Batch*> blist) {
 
 void Probleme2::printBestSol() {
     int i;
+
     cout << "______________________________________________________\n";
-    cout << "Meilleure solution trouvee :\n\t";
+    cout << "Meilleure solution trouvee :\n\n";
     for (i = 0; i < bestSol.size(); ++i) {
         cout << "0--->" << bestSol[i]->getClient()->getNum() << "--->";
     }
     cout << "0\n\n";	// A la fin, on revient chez le fournisseur
+    cout << "Evaluation de cette solution : " << evalBestSol << "\n";
+    cout << "______________________________________________________\n";
+}
+
+/* écriture de la meilleure solution, de façon plus détaillée */
+void Probleme2::printBestSol_indo() {
+    int i;
+
+    setDates_livraison_bestSol();
+
+    cout << "______________________________________________________\n";
+    cout << "\nMeilleure solution trouvee :\n\n";
+
+    for (i = 0; i < bestSol.size(); ++i) {
+        cout << "0--->" << bestSol[i]->getClient()->getNum() << "--->0\n";
+        cout << "Details du batch :\n";
+        bestSol[i]->printBatch();
+        cout <<"\n\n";
+    }
     cout << "Evaluation de cette solution : " << evalBestSol << "\n";
     cout << "______________________________________________________\n";
 }
@@ -141,7 +161,8 @@ void Probleme2::printSol(vector<Batch*> solution,float evalCurSol) {
  *          (avant ou après ??)
  * - et voir s'il est possible de le scinder (envoyer un bout avant  pour que le nouveau batch soit plus optimal
  *
- *          PREMIEIERE VERSION : LES BATCHES NE SE SCINDENT JAMAIS                                              */
+ *          PREMIEIERE VERSION : LES BATCHES NE SE SCINDENT JAMAIS
+ *                                                        */
 
 void Probleme2::solve_indo(){
 
@@ -205,6 +226,8 @@ void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,floa
             reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
             bestSol = curSol;
             evalBestSol = curEval;
+        } else {
+            cout<<"Pire solution, on oublie.\n";
         }
 
         return;
@@ -218,8 +241,7 @@ void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,floa
         }
     }
 
-    printBatchs(resBatches);
-    /* Test de toutes les combinaisons de livraison */
+    /* Test de toutes les combinaisons de livraison récursivement*/
     vector<Batch*>::iterator it = resBatches.begin();
 
     while(it != resBatches.end()){
@@ -235,6 +257,7 @@ void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,floa
     }
 }
 
+/* Supprime un batch d'une liste de batches */
 void Probleme2::removeBatch(vector<Batch*> &newRest,Batch* temp){
 
     vector<Batch*>::iterator it;
@@ -265,18 +288,16 @@ Produit* Probleme2::produitDueMax(vector<Produit* > plist){
 
     Produit* max = plist[0];
     int i;
-
     for(i=0;i<plist.size();++i){
         if(plist[i]->dateDue() > max->dateDue()){
             max = plist[i];
         }
     }
-
     return max;
 }
 
 /* Contrairement à evaluerSolution, cette fonction va évaluer la solution donnée en reconstruisant
-   lui même la timeline de livraison. Elle n'a donc pas besoin de dateCourante
+   lui même la timeline de livraison à partir d'une liste de batch. Elle n'a donc pas besoin de dateCourante
    /!\ CONTRAIREMENT A EVALUERSOLUTION, CETTE EVALUATION SE FAIT EN BACKTRACK /!\ */
 float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
 
@@ -299,6 +320,7 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
         }
 
         float tempCoutStock = s[i]->coutStockage(curTime);
+        s[i]->setDate_livraison(curTime);
         ev += tempCoutStock;
         cout<<"Batch pour client "<<s[i]->getProduits()[0]->getClient()->getNum()<<", Cout stockage :  "<<tempCoutStock<<"\n\tDate : "<<curTime<<"/"<<s[i]->dateDueGlobale()<<endl;
 
@@ -312,6 +334,22 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
     return ev;
 }
 
+/* Pour la meilleure solution, renseigne les dates d'arrivées des meilleurs batches */
+void Probleme2::setDates_livraison_bestSol(){
+    float curTime = bestSol[0]->dateDueGlobale() + bestSol[0]->getClient()->getDist();
+    for (int i = 0; i < bestSol.size(); ++i) {
+
+        curTime -= bestSol[i]->getClient()->getDist();
+
+        if(curTime > bestSol[i]->dateDueGlobale()){
+            curTime = bestSol[i]->dateDueGlobale();
+        }
+
+        bestSol[i]->setDate_livraison(curTime);
+
+        curTime -= bestSol[i]->getClient()->getDist();
+    }
+}
 
 
 

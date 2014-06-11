@@ -34,16 +34,20 @@ private:
     // void buildBatchs();
     void solve(vector<Batch*> cur, vector<Produit*> reste);
     float evaluerSolution(vector<Batch*>);
-    float evaluerSolution_auto(vector<Batch*>);
-    void removeProduct(vector<Produit*> &plist, Produit* p);
-    void removeBatch(vector<Batch*> &newRest,Batch* temp);
     bool livraisonImmediate(Produit*);
+
+
+    /* Fonctions pour solution by indo : */
+
+    void printBatchs(vector<Batch*> blist);
+    void printSol(vector<Batch*> solution,float evalCurSol);
+    void setDates_livraison_bestSol();
     void build_batches(vector<Batch*> &cur, vector<Produit*> res);
     void solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,float curEval);
     Produit* produitDueMax(vector<Produit* > plist);
-    float livraison(Batch* b,float &curTime);
-    void printBatchs(vector<Batch*> blist);
-    void printSol(vector<Batch*> solution,float evalCurSol);
+    float evaluerSolution_auto(vector<Batch*>);
+    void removeProduct(vector<Produit*> &plist, Produit* p);
+    void removeBatch(vector<Batch*> &newRest,Batch* temp);
 
 public:
     Probleme2();
@@ -52,7 +56,9 @@ public:
 
     void printBatchs();
     void printProduits();
+
     void printBestSol();
+    void printBestSol_indo();
     void printSol(int niveau);
 
     void solve();

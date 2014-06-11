@@ -72,9 +72,9 @@ void Batch::printBatch(){
 		produits[j]->printProduit();
     }
 
-    cout << "\tDate due globale    : " << dateDueGlobale() << "\n";
     cout << "\tSomme des avances   : " << sommeAvancesMin() << "\n";
-    cout << "\tCout stockage client: " << getClient()->coutUnitaireStockage() << "\n\n";
+    cout << "\tCout stockage client: " << getClient()->coutUnitaireStockage() << "\n";
+    cout << "\tDate de livraison   : " << date_livraison << "/" << dateDueGlobale() << "\n";
 }
 
 void Batch::setDate_livraison(float date){
