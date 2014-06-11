@@ -73,7 +73,7 @@ void Batch::printBatch(){
     }
 
     cout << "\tSomme des avances   : " << sommeAvancesMin() << "\n";
-    cout << "\tCout stockage client: " << getClient()->coutUnitaireStockage() << "\n";
+    cout << "\tCoeff stock. client : " << getClient()->coutUnitaireStockage() << "\n";
     cout << "\tDate de livraison   : " << date_livraison << "/" << dateDueGlobale() << "\n";
 }
 

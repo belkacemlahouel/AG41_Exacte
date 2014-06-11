@@ -26,4 +26,8 @@ Au lieu d’ajouter les produits/batchs à la fin			<—————=
 Pour la solution récursive : n'ajouter que le calcul du nouveau
 	batch à la solution, au lieu de la recalculer en entier
 	Du coup : faire récurser aussi la date courante ?
+	
+	Regarder si des fois il ne vaut pas mieux mettre dans le même batch !!
+	
+	Réfléchir à comment scinder puis refusionner les batches...
 

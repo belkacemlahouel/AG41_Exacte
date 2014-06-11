@@ -118,6 +118,7 @@ void Probleme2::printBestSol_indo() {
         cout << "0--->" << bestSol[i]->getClient()->getNum() << "--->0\n";
         cout << "Details du batch :\n";
         bestSol[i]->printBatch();
+        cout<<"\tCout stock. client  : "<<bestSol[i]->coutStockage(bestSol[i]->getDate_livraison());
         cout <<"\n\n";
     }
     cout << "Evaluation de cette solution : " << evalBestSol << "\n";
@@ -309,8 +310,8 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
     /* La date de départ est la date de livraison du dernier batch + le temps de retour a l'entrepôt */
     curTime = s[0]->dateDueGlobale() + s[0]->getClient()->getDist();
     for (int i = 0; i < s.size(); ++i) {
-        //ev += livraison(s[i],curTime);
-        ev += s[i]->getClient()->getDist() * 2*eta;
+
+        ev += s[i]->getClient()->getDist() *2*eta; /* On fait payer l'aler-retour */
 
         curTime -= s[i]->getClient()->getDist();
 
@@ -334,20 +335,23 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
     return ev;
 }
 
-/* Pour la meilleure solution, renseigne les dates d'arrivées des meilleurs batches */
+/* Pour la meilleure solution, renseigne les dates d'arrivées des meilleurs batches,
+ * bestSol est à l'endroit on doit donc la reverse pour bracktrack ici.*/
 void Probleme2::setDates_livraison_bestSol(){
-    float curTime = bestSol[0]->dateDueGlobale() + bestSol[0]->getClient()->getDist();
-    for (int i = 0; i < bestSol.size(); ++i) {
+    vector<Batch*> tempBestSol = bestSol;
+    reverse(tempBestSol.begin(),tempBestSol.end());
+    float curTime = tempBestSol[0]->dateDueGlobale() + tempBestSol[0]->getClient()->getDist(); // départ du temps à l'entrepot, à la fin
+    for (int i = 0; i < tempBestSol.size(); ++i) {
 
-        curTime -= bestSol[i]->getClient()->getDist();
+        curTime -= tempBestSol[i]->getClient()->getDist();
 
-        if(curTime > bestSol[i]->dateDueGlobale()){
-            curTime = bestSol[i]->dateDueGlobale();
+        if(curTime > tempBestSol[i]->dateDueGlobale()){
+            curTime = tempBestSol[i]->dateDueGlobale();
         }
 
-        bestSol[i]->setDate_livraison(curTime);
+        tempBestSol[i]->setDate_livraison(curTime);
 
-        curTime -= bestSol[i]->getClient()->getDist();
+        curTime -= tempBestSol[i]->getClient()->getDist();
     }
 }
 
