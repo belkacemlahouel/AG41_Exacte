@@ -11,6 +11,7 @@ class Batch{
 
 	private:
 		vector<Produit*> produits;
+		float date_livraison;       // la date à laquelle a été livrée le batch
 
 	public:
 		Batch(Produit*);
@@ -24,8 +25,11 @@ class Batch{
         vector<Produit*> getProduits();
         Client* getClient();
 
-        float coutStockage(int date);
+        float coutStockage(float date);
         float sommeAvancesMin();
+
+        void setDate_livraison(float date);
+        float getDate_livraison();
 };
 
 #endif // __BATCH__

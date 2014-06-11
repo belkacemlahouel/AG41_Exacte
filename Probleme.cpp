@@ -59,7 +59,6 @@ Probleme::Probleme() {
 Probleme::~Probleme() {
 	Tools::viderVector(clients);
 	Tools::viderVector(produits);
-
 	Tools::viderVector(batchs);
 }
 
@@ -244,7 +243,7 @@ bool Probleme::encorePossible(vector<Batch*> reste) {
 	for (int i = 0; i < reste.size(); ++i) {
 		if (reste[i]->dateDueGlobale() < // dateCourante) {
 						dateCourante + reste[i]->getClient()->getDist()) {
-			
+
 			return false;
 		}
 	}

@@ -3,6 +3,7 @@
 Batch::Batch(Produit* p) {
 	// Pas besoin d'allouer de la mémoire au vector ?
 	produits.push_back(p);
+	date_livraison = 0;
 }
 
 int Batch::size() {
@@ -35,11 +36,11 @@ float Batch::dateDueGlobale() {
     return min;
 }
 
-float Batch::coutStockage(int date) {
+float Batch::coutStockage(float date) {
     int i;
     float cout_stockage_total = 0;
 
-    for (i = 0; i < size(); ++i) {
+    for (i = 0; i < produits.size(); ++i) {
         cout_stockage_total += produits[i]->coutStockage(date);
     }
 
@@ -72,7 +73,16 @@ void Batch::printBatch(){
     }
 
     cout << "\tDate due globale    : " << dateDueGlobale() << "\n";
-    cout << "\tSomme des avances   : " << sommeAvancesMin() << "\n\n";
+    cout << "\tSomme des avances   : " << sommeAvancesMin() << "\n";
+    cout << "\tCout stockage client: " << getClient()->coutUnitaireStockage() << "\n\n";
+}
+
+void Batch::setDate_livraison(float date){
+    date_livraison = date;
+}
+
+float Batch::getDate_livraison(){
+    return date_livraison;
 }
 
 

@@ -6,9 +6,8 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
 	eta = _eta;
 
 	clients = _clients;
-	produits = _produits;
 
-//	buildBatchs();
+	produits = _produits;
 
 	evalSol = 0;
 	evalBestSol = 0;
@@ -20,6 +19,20 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
 Probleme2::Probleme2(string filename) {
     Parser r(filename);
     init(r.getCapa(), r.getEta(), r.getClients(), r.getProduits());
+}
+
+void Probleme2::printProduits(){
+vector<Produit*>::iterator it;
+
+    cout<<"\nListe des jobs :\n\n";
+
+    for(it = produits.begin();it != produits.end(); ++it){
+        cout<<"\tNum : "<<(*it)->getNum()<<"\n";
+        cout<<"\tClient : "<<(*it)->getClient()->getNum()<<"\n";
+        cout<<"\tSon cout unitaire: "<<(*it)->getClient()->coutUnitaireStockage()<<"\n";
+        cout<< setprecision(12) << setiosflags(ios::fixed) << setiosflags(ios::showpoint) << "\tDate due : "<<(*it)->dateDue()<<"\n";
+        cout<<"\n";
+    }
 }
 
 // Instance de base, voir sujet
@@ -72,12 +85,11 @@ void Probleme2::printBatchs() {
 	}
 }
 
-void Probleme2::printProduits() {
-	cout << "Liste des produits à livrer :" << endl;
-	for (int i = 0; i < produits.size(); ++i) {
-		produits[i]->printProduit();
+void Probleme2::printBatchs(vector<Batch*> blist) {
+	int i;
+	for(i = 0; i < blist.size(); ++i) {
+        blist[i]->printBatch();
 	}
-	cout << endl;
 }
 
 void Probleme2::printBestSol() {
@@ -104,9 +116,213 @@ void Probleme2::printSol(int niveau) {
     cout << "______________________________________________________\n";
 }
 
+void Probleme2::printSol(vector<Batch*> solution,float evalCurSol) {
+	int i;
+    cout << "______________________________________________________\n";
+    cout << "Solution courante trouvee :\n\t";
+    for (i = 0; i < solution.size(); ++i) {
+        cout << "0--->" << solution[i]->getClient()->getNum() << "--->";
+    }
+    cout << "0\n\n";	// A la fin, on revient chez le fournisseur
+    cout << "Evaluation de cette solution : " << evalCurSol << "\n";
+    cout << "______________________________________________________\n";
+}
+
 // ----------------------------------------------------------
 // ----------------------- RESOLUTION -----------------------
 // ----------------------------------------------------------
+
+//---------------------------------------
+//          PARTIE INDO
+//---------------------------------------
+
+/* test d'une nouvelle solution de résolution. Algo :
+ * - créer les batch comme d'habitude. Si un batch se voit livré plus tôt que sa date due, reprendre les batchs aux alentours
+ *          (avant ou après ??)
+ * - et voir s'il est possible de le scinder (envoyer un bout avant  pour que le nouveau batch soit plus optimal
+ *
+ *          PREMIEIERE VERSION : LES BATCHES NE SE SCINDENT JAMAIS                                              */
+
+void Probleme2::solve_indo(){
+
+    solutionHeuristique();
+
+    vector<Batch*> batches(0);
+    vector<Produit*> res = produits;
+    build_batches(batches,res);
+
+    vector<Batch*> cursol(0);
+    float curCost = 0;
+    solve_indo(cursol, batches, curCost);
+
+}
+
+void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
+
+    if(res.size() == 0){
+        return;
+    }
+
+
+    /* On cherche à construire le nouveau batch en fonction du produit à la date due maximale dans res (à livrer au plus tard en théorie) */
+    Produit* firstProd = produitDueMax(res);
+
+    /* Le nouveau batch est construit */
+    Batch* tmp = new Batch(firstProd);
+    cur.push_back(tmp);
+
+    /* Le nouveau produit ajouté au batch, on peut donc le supprimer de la liste */
+    removeProduct(res,firstProd);
+
+    /* On construit le batch à partir du premier produit dedans */
+    int i = 0;
+    while(tmp->getProduits().size() <= capa && i<res.size()){
+        if(res[i]->getClient()->getNum() == tmp->getProduits()[0]->getClient()->getNum()){
+            /* Condition pour être ajouté au batch : Doit avec une date due <= le premier produit du batch - l'aller-retour */
+            if(res[i]->dateDue() >= (tmp->getProduits()[0]->dateDue() - tmp->getProduits()[0]->getClient()->getDist()*2)){
+                tmp->addProduit(res[i]);
+                removeProduct(res,res[i]);
+            } else {
+                ++i; // On n'incrémente que si aucun produit n'a été supprimé
+            }
+        } else {
+            ++i;
+        }
+    }
+
+    tmp->printBatch();
+
+    /* On continue à créer les batches et à les placer dans la timeline récursivement */
+    build_batches(cur, res);
+}
+
+void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,float curEval){
+
+    if(resBatches.size() == 0){
+        curEval = evaluerSolution_auto(curSol);
+        if(curEval < evalBestSol){
+            cout<<"Meilleure solution trouvee. On l'enregistre.\n";
+            reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
+            bestSol = curSol;
+            evalBestSol = curEval;
+        }
+
+        return;
+    }
+
+    if(curSol.size() > 0){
+        curEval = evaluerSolution_auto(curSol);
+        if(curEval > evalBestSol){
+            cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
+            return;
+        }
+    }
+
+    printBatchs(resBatches);
+    /* Test de toutes les combinaisons de livraison */
+    vector<Batch*>::iterator it = resBatches.begin();
+
+    while(it != resBatches.end()){
+        Batch* temp = *it;
+
+        vector<Batch*> newSol = curSol;
+        newSol.push_back(temp);
+        vector<Batch*> newRest = resBatches;
+
+        removeBatch(newRest,temp);
+        solve_indo(newSol,newRest,curEval);
+        ++it;
+    }
+}
+
+void Probleme2::removeBatch(vector<Batch*> &newRest,Batch* temp){
+
+    vector<Batch*>::iterator it;
+
+    for(it=newRest.begin();it!=newRest.end();++it){
+        if(*it == temp){
+            newRest.erase(it);
+            break;
+        }
+    }
+
+}
+
+/* Supprime le produit p de la liste de produits plist */
+void Probleme2::removeProduct(vector<Produit*> &plist, Produit* p){
+    vector<Produit*>::iterator it;
+
+    for(it=plist.begin();it!=plist.end();++it){
+        if(*it == p){
+            plist.erase(it);
+            break;
+        }
+    }
+}
+
+/* Renvoie un pointeur sur le produit qui a la plus grosse date due parmis une liste de produits */
+Produit* Probleme2::produitDueMax(vector<Produit* > plist){
+
+    Produit* max = plist[0];
+    int i;
+
+    for(i=0;i<plist.size();++i){
+        if(plist[i]->dateDue() > max->dateDue()){
+            max = plist[i];
+        }
+    }
+
+    return max;
+}
+
+/* Contrairement à evaluerSolution, cette fonction va évaluer la solution donnée en reconstruisant
+   lui même la timeline de livraison. Elle n'a donc pas besoin de dateCourante
+   /!\ CONTRAIREMENT A EVALUERSOLUTION, CETTE EVALUATION SE FAIT EN BACKTRACK /!\ */
+float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
+
+    float curTime = 0;
+    cout << "Evaluation solution"<<endl;
+    cout << "Detail de la solution :\n";
+
+    float ev = 0;
+    /* La date de départ est la date de livraison du dernier batch + le temps de retour a l'entrepôt */
+    curTime = s[0]->dateDueGlobale() + s[0]->getClient()->getDist();
+    for (int i = 0; i < s.size(); ++i) {
+        //ev += livraison(s[i],curTime);
+        ev += s[i]->getClient()->getDist() * 2*eta;
+
+        curTime -= s[i]->getClient()->getDist();
+
+        /* Si la date de livraison est trop tôt pour le client, il faut attendre à l'entrepôt pour ne pas l'amener trop tôt */
+        if(curTime > s[i]->dateDueGlobale()){
+            curTime = s[i]->dateDueGlobale();
+        }
+
+        float tempCoutStock = s[i]->coutStockage(curTime);
+        ev += tempCoutStock;
+        cout<<"Batch pour client "<<s[i]->getProduits()[0]->getClient()->getNum()<<", Cout stockage :  "<<tempCoutStock<<"\n\tDate : "<<curTime<<"/"<<s[i]->dateDueGlobale()<<endl;
+
+        curTime -= s[i]->getClient()->getDist();
+    }
+
+    vector<Batch*> affichageSol = s;
+    reverse(affichageSol.begin(), affichageSol.end());
+    printSol(affichageSol,ev);
+
+    return ev;
+}
+
+
+
+
+
+
+
+
+//---------------------------------------
+//          PARTIE BELKA
+//---------------------------------------
+
 
 void Probleme2::solve() {
     // On trie les produits par ordre décroissant des dates dues

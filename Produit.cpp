@@ -19,7 +19,7 @@ int Produit::getNum() {
 }
 
 // Comment implémenter les coûts si retard ...?
-float Produit::coutStockage(int t) {
+float Produit::coutStockage(float t) {
 	return (date-t) * client->coutUnitaireStockage();
 }
 

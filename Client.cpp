@@ -3,11 +3,11 @@
 Client::Client(int _h, float _dist, float _cout) {
 	h = _h;
 	dist = _dist;
-	cout = _cout;
+	cost = _cout;
 }
 
 float Client::coutUnitaireStockage() {
-	return cout;
+    return cost;
 }
 
 float Client::getDist() {

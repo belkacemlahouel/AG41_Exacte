@@ -198,6 +198,7 @@ void Parser::printProduits(){
     for(it = produits.begin();it != produits.end(); ++it){
         cout<<"\tNum : "<<(*it)->getNum()<<"\n";
         cout<<"\tClient : "<<(*it)->getClient()->getNum()<<"\n";
+        cout<<"\tSon cout unitaire: "<<(*it)->getClient()->coutUnitaireStockage()<<"\n";
         cout<< setprecision(12) << setiosflags(ios::fixed) << setiosflags(ios::showpoint) << "\tDate due : "<<(*it)->dateDue()<<"\n";
         cout<<"\n";
     }

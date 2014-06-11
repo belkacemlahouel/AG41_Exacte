@@ -17,7 +17,7 @@ class Produit {
 		float dateDue();
 		Client* getClient();
 		int getNum();
-		float coutStockage(int _date);
+		float coutStockage(float _date);
 		void printProduit();
 };
 

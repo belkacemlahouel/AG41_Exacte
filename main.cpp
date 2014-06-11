@@ -30,11 +30,11 @@ int main(int argc, char** argv) {
     if (argc == 2) {
         p = new Probleme2(argv[1]);
     } else {
-        p = new Probleme2();
+        p = new Probleme2("instances/instance20n4cl.txt");
     }
 
     p->printBatchs();
-    p->solve();
+    p->solve_indo();
     p->printBestSol();
 
     delete(p);
