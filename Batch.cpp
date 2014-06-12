@@ -1,5 +1,8 @@
 #include "Batch.h"
 
+Batch::Batch() {
+}
+
 Batch::Batch(Produit* p) {
 	// Pas besoin d'allouer de la mémoire au vector ?
 	produits.push_back(p);

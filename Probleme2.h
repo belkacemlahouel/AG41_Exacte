@@ -40,6 +40,7 @@ private:
     /* Fonctions pour solution by indo : */
 
     void printBatchs(vector<Batch*> blist);
+    void printProduits(vector<Produit*> plist);
     void printSol(vector<Batch*> solution,float evalCurSol);
     void setDates_livraison_bestSol();
     void build_batches(vector<Batch*> &cur, vector<Produit*> res);

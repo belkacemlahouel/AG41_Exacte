@@ -35,6 +35,20 @@ vector<Produit*>::iterator it;
     }
 }
 
+void Probleme2::printProduits(vector<Produit*> plist){
+vector<Produit*>::iterator it;
+
+    cout<<"\nListe des jobs :\n\n";
+
+    for(it = plist.begin();it != plist.end(); ++it){
+        cout<<"\tNum : "<<(*it)->getNum()<<"\n";
+        cout<<"\tClient : "<<(*it)->getClient()->getNum()<<"\n";
+        cout<<"\tSon cout unitaire: "<<(*it)->getClient()->coutUnitaireStockage()<<"\n";
+        cout<< setprecision(12) << setiosflags(ios::fixed) << setiosflags(ios::showpoint) << "\tDate due : "<<(*it)->dateDue()<<"\n";
+        cout<<"\n";
+    }
+}
+
 // Instance de base, voir sujet
 Probleme2::Probleme2() {
 	capa = 5;
@@ -205,15 +219,53 @@ void Probleme2::solve_bruteforce(vector<Batch*> curSol, vector<Produit*> res, fl
 
     while(it != res.end()){
 		Produit* tempProd = *it;
-        Batch* temp = new Batch(tempProd);
-
+        int toAdd = 0;
 		/* Ici, il faut regarder s'il y a moyen de faire une fusion ou non !! */
 
         vector<Batch*> newSol = curSol;
-        newSol.push_back(temp);
+
+        cout<<"Nouvelle solution : \n";
+        printBatchs(newSol);
+
+        /* ICI, APRES AVOIR TROUVE LA PREMIERE SOLUTION, NEWSOL DEVRAIT ETRE VIDE !! */
+
+		if(newSol.size() == 0){
+            /* C'est le premier batch à livrer, donc on cale la date courante en fonction de lui */
+            curTime = tempProd->dateDue();
+            toAdd = 1;
+		} else {
+            /* On regarde si le batch envoyé plus tard (enfin avant, dans la solCur...)
+             * est est du même client que le produit qu'on vient de tirer dans res */
+
+             if(newSol[newSol.size()-1]->getClient() == tempProd->getClient()){
+
+                /* A partir de là, il y a plusieurs choix :
+                    - en réalité (pour une vraie bruteforce), on devrait récurser sur les
+                        deux possibilités (fusion avec le batch ou pas)
+                    - pour accélérer les choses, pour le moment on l'ajoute juste au batch précédent */
+
+                if(newSol[newSol.size()-1]->getProduits().size() < capa){ // on regarde s'il reste de la place dans le batch
+                    newSol[newSol.size()-1]->addProduit(tempProd);
+
+                } else { // sinon on en créé un nouveau
+                    toAdd = 1;
+                }
+             } else { // si ce n'est pas le même client, idem, on créé un batch
+                toAdd = 1;
+             }
+		}
+
+		if(toAdd){
+            Batch* temp = new Batch(tempProd);
+            newSol.push_back(temp);
+		}
+
         vector<Produit*> newRest = res;
 
         removeProduct(newRest,tempProd);
+
+        /* Il faut rajouter ici le décallage de temps */
+
         solve_bruteforce(newSol,newRest,curTime,curEval);
         ++it;
     }
@@ -312,6 +364,9 @@ void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,floa
         Batch* temp = *it;
 
         vector<Batch*> newSol = curSol;
+
+        printBatchs(newSol);
+
         newSol.push_back(temp);
         vector<Batch*> newRest = resBatches;
 

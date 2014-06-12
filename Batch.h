@@ -15,6 +15,7 @@ class Batch{
 
 	public:
 		Batch(Produit*);
+		Batch();
 		~Batch(){}
 		void printBatch();
 
