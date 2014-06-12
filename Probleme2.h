@@ -48,6 +48,7 @@ private:
     float evaluerSolution_auto(vector<Batch*>);
     void removeProduct(vector<Produit*> &plist, Produit* p);
     void removeBatch(vector<Batch*> &newRest,Batch* temp);
+    void solve_bruteforce(vector<Batch*> curSol, vector<Produit*> res, float curTime, float curEval);
 
 public:
     Probleme2();
@@ -63,6 +64,7 @@ public:
 
     void solve();
     void solve_indo();
+    void solve_bruteforce();
 };
 
 #endif // __PROBLEME__

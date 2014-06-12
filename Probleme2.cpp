@@ -157,6 +157,69 @@ void Probleme2::printSol(vector<Batch*> solution,float evalCurSol) {
 //          PARTIE INDO
 //---------------------------------------
 
+/* Troisième fonction de résolution, cette fois en bruteforce :
+ * 	- Livrer un produit
+ *	- Si ce produit peut aller avec un batch livré plus tard, le faire
+ *	- Sinon, le mettre dans un batch à part. */
+
+void Probleme2::solve_bruteforce(){
+
+	solutionHeuristique();
+
+	vector<Batch*> curSol(0);
+	vector<Produit*> res = produits;
+    float curEval = 0;
+	float curTime = 0; // On met à 0 pour l'initialiser à quelque chose, mais en réalité il sera instancié réellemet dans la résolution
+
+    solve_bruteforce(curSol, res, curTime, curEval);
+
+}
+
+void Probleme2::solve_bruteforce(vector<Batch*> curSol, vector<Produit*> res, float curTime, float curEval){
+
+	/* Tous les produits sont inclus dans la solution : on peut la regarder */
+	if(res.size() == 0){
+        curEval = evaluerSolution_auto(curSol);
+        if(curEval < evalBestSol){
+            cout<<"Meilleure solution trouvee. On l'enregistre.\n";
+            reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
+            bestSol = curSol;
+            evalBestSol = curEval;
+        } else {
+            cout<<"Pire solution, on oublie.\n";
+        }
+        return;
+    }
+
+	/* Mais il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
+    if(curSol.size() > 0){
+        curEval = evaluerSolution_auto(curSol);
+        if(curEval > evalBestSol){
+            cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
+            return;
+        }
+    }
+
+	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
+    vector<Produit*>::iterator it = res.begin();
+
+    while(it != res.end()){
+		Produit* tempProd = *it;
+        Batch* temp = new Batch(tempProd);
+
+		/* Ici, il faut regarder s'il y a moyen de faire une fusion ou non !! */
+
+        vector<Batch*> newSol = curSol;
+        newSol.push_back(temp);
+        vector<Produit*> newRest = res;
+
+        removeProduct(newRest,tempProd);
+        solve_bruteforce(newSol,newRest,curTime,curEval);
+        ++it;
+    }
+}
+
+
 /* test d'une nouvelle solution de résolution. Algo :
  * - créer les batch comme d'habitude. Si un batch se voit livré plus tôt que sa date due, reprendre les batchs aux alentours
  *          (avant ou après ??)
