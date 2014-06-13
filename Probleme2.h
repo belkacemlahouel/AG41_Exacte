@@ -18,6 +18,8 @@ private:
     vector<Batch*> batchs;
 
     vector<Batch*> bestSol;			// Meilleure solution (l'ordre des batches est le bon
+    vector<Batch> bestSol_noptr;			// Meilleure solution (l'ordre des batches est le bon
+
     float evalBestSol;				// + Evaluation
     vector<Batch*> sol;				// Solution en cours
     float evalSol;					// + Evaluation
@@ -42,14 +44,17 @@ private:
     void printBatchs(vector<Batch*> blist);
     void printProduits(vector<Produit*> plist);
     void printSol(vector<Batch*> solution,float evalCurSol);
+    void printSol_noptr(vector<Batch> solution,float evalCurSol);
     void setDates_livraison_bestSol();
+    void setDates_livraison_bestSol_noptr();
     void build_batches(vector<Batch*> &cur, vector<Produit*> res);
     void solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,float curEval);
     Produit* produitDueMax(vector<Produit* > plist);
     float evaluerSolution_auto(vector<Batch*>);
+    float evaluerSolution_auto_noptr(vector<Batch> s);
     void removeProduct(vector<Produit*> &plist, Produit* p);
     void removeBatch(vector<Batch*> &newRest,Batch* temp);
-    void solve_bruteforce(vector<Batch*> curSol, vector<Produit*> res, float curTime, float curEval);
+    void solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, float curTime, float curEval);
 
 public:
     Probleme2();
@@ -61,6 +66,7 @@ public:
 
     void printBestSol();
     void printBestSol_indo();
+    void printBestSol_indo_noptr();
     void printSol(int niveau);
 
     void solve();
