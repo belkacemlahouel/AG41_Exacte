@@ -106,6 +106,13 @@ void Probleme2::printBatchs(vector<Batch*> blist) {
 	}
 }
 
+void Probleme2::printBatchs(vector<Batch> blist) {
+	int i;
+	for(i = 0; i < blist.size(); ++i) {
+        blist[i].printBatch();
+	}
+}
+
 void Probleme2::printBestSol() {
     int i;
 
@@ -209,7 +216,7 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 
 void Probleme2::solve_bruteforce(){
 
-	//solutionHeuristique();
+	solutionHeuristique();
 
 	vector<Batch> curSol(0);
 	vector<Produit*> res = produits;
@@ -225,12 +232,16 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, flo
 	/* Tous les produits sont inclus dans la solution : on peut la regarder */
 	if(res.size() == 0){
         curEval = evaluerSolution_auto_noptr(curSol);
+        printBatchs(curSol);
+        printSol_noptr(curSol,curEval);
+
         if(curEval < evalBestSol){
             cout<<"Meilleure solution trouvee. On l'enregistre.\n";
             reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
             bestSol_noptr = curSol;
-            printBestSol_indo_noptr();
             evalBestSol = curEval;
+            printBestSol_indo_noptr();
+
         } else {
             //cout<<"Pire solution, on oublie.\n";
         }
@@ -371,6 +382,9 @@ void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,floa
 
     if(resBatches.size() == 0){
         curEval = evaluerSolution_auto(curSol);
+        printBatchs(curSol);
+        printSol(curSol,curEval);
+
         if(curEval < evalBestSol){
             cout<<"Meilleure solution trouvee. On l'enregistre.\n";
             reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée

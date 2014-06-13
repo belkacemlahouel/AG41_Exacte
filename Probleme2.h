@@ -62,6 +62,7 @@ public:
     ~Probleme2();
 
     void printBatchs();
+    void printBatchs(vector<Batch> blist);
     void printProduits();
 
     void printBestSol();
