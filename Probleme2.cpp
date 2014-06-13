@@ -216,7 +216,9 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 
 void Probleme2::solve_bruteforce(){
 
-	solutionHeuristique();
+	//solutionHeuristique();
+
+    //evalBestSol = 2320;
 
 	vector<Batch> curSol(0);
 	vector<Produit*> res = produits;
@@ -232,8 +234,6 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, flo
 	/* Tous les produits sont inclus dans la solution : on peut la regarder */
 	if(res.size() == 0){
         curEval = evaluerSolution_auto_noptr(curSol);
-        printBatchs(curSol);
-        printSol_noptr(curSol,curEval);
 
         if(curEval < evalBestSol){
             cout<<"Meilleure solution trouvee. On l'enregistre.\n";
