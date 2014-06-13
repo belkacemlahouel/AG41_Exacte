@@ -273,7 +273,6 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, flo
 
 		if(newSol.size() == 0){
             /* C'est le premier batch à livrer, donc on cale la date courante en fonction de lui */
-            curTime = tempProd->dateDue();
             toAdd = 1;
 		} else {
             /* On regarde si le batch envoyé plus tard (enfin avant, dans la solCur...)
