@@ -60,7 +60,7 @@ private:
     void printCombinations(vector<Batch> combs);
     void printCombinations(vector<int*> combs,int r);
     void removeEmptyFields(vector<Produit*> &ptr);
-    void solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float curEval);
+    void solve_bruteforce(vector<Batch> curSol, vector<Batch> res);
     bool alreadyInSol(Batch batch,vector<Batch> sol);
     bool allProdsInSol(vector<Batch> sol);
     bool sameProducts(Batch batch1,Batch batch2);

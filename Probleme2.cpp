@@ -233,10 +233,7 @@ void Probleme2::solve_bruteforce(){
     sort(res.begin(), res.end(),
          Tools::comparatorBatchDateDue);
 
-    //cout<<"BATCHES AVEC TRI : \n";
-    //printBatchs(res);
-
-    solve_bruteforce(curSol, res, curEval);
+    solve_bruteforce(curSol, res);
 
 }
 
@@ -352,16 +349,13 @@ vector<Produit*> Probleme2::getProdsClient(int num){
     return prods;
 }
 
-void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float curEval){
+void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res){
 
-    //printBatchs(curSol);
-    //printSol_noptr(curSol,curEval);
+    float curEval = 0;
 
     /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
     if(res.size() == 0){
-
                 curEval = evaluerSolution_auto_noptr(curSol);
-
                 if(curEval < evalBestSol){
                     cout<<"Meilleure solution trouvee. On l'enregistre.\n";
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
@@ -372,7 +366,6 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float 
                 } else {
                     //cout<<"Pire solution, on oublie.\n";
                 }
-
             return;
     }
 
@@ -397,56 +390,10 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float 
         vector<Batch> newRest = res;
         removeBatch(newRest, tempBatch);
 
-        //cout<<"\n\n__________________________\n";
-        //printBatchs(newRest);
-        /* supprimer AUSSI les batches avec des produits contenus dans le nouveau batch ajouté */
-
-        solve_bruteforce(newSol,newRest,curEval);
+        solve_bruteforce(newSol,newRest);
 
         it++;
     }
-}
-
-/* Regarde si tous les produits sont dans la solution */
-bool Probleme2::allProdsInSol(vector<Batch> sol){
-
-    int i,j,k;
-    int inSol;
-
-    for(i=0;i<produits.size();++i){
-        inSol = false;
-        for(j=0;j<sol.size();++j){
-            for(k=0;k<sol[j].getProduits().size();++k){
-                if(sol[j].getProduits()[k]->getNum() == produits[i]->getNum()){
-                    inSol = true;
-                }
-            }
-        }
-        if(!inSol)
-            return false;
-    }
-
-    return true;
-}
-
-/* Regarde si parmis les produits dans batch, il n'y en a pas un déjà dans sol */
-bool Probleme2::alreadyInSol(Batch batch,vector<Batch> sol){
-
-    int i,j,k;
-
-    int taille = batch.getProduits().size();
-
-    for(i=0;i<batch.getProduits().size();++i){
-        for(j=0;j<sol.size();++j){
-            for(k=0;k<sol[j].getProduits().size();++k){
-                if(sol[j].getProduits()[k]->getNum() == batch.getProduits()[i]->getNum()){
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
 }
 
 /* test d'une nouvelle solution de résolution. Algo :
@@ -454,8 +401,7 @@ bool Probleme2::alreadyInSol(Batch batch,vector<Batch> sol){
  *          (avant ou après ??)
  * - et voir s'il est possible de le scinder (envoyer un bout avant  pour que le nouveau batch soit plus optimal
  *
- *          PREMIEIERE VERSION : LES BATCHES NE SE SCINDENT JAMAIS
- *                                                        */
+ *          PREMIEIERE VERSION : LES BATCHES NE SE SCINDENT JAMAIS              */
 
 void Probleme2::solve_indo(){
 
@@ -477,7 +423,6 @@ void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
         return;
     }
 
-
     /* On cherche à construire le nouveau batch en fonction du produit à la date due maximale dans res (à livrer au plus tard en théorie) */
     Produit* firstProd = produitDueMax(res);
 
@@ -490,8 +435,6 @@ void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
 
     /* On construit le batch à partir du premier produit dedans */
     int i = 0;
-
-    /* PB ICI : ON A PARFOIS UN BATCH DE 7 !! */
 
     while(tmp->getProduits().size() < capa && i<res.size()){
         if(res[i]->getClient()->getNum() == tmp->getProduits()[0]->getClient()->getNum()){
@@ -670,15 +613,8 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
         float tempCoutStock = s[i]->coutStockage(curTime);
         s[i]->setDate_livraison(curTime);
         ev += tempCoutStock;
-        cout<<"Batch pour client "<<s[i]->getProduits()[0]->getClient()->getNum()<<", Cout stockage :  "<<tempCoutStock<<"\n\tDate : "<<curTime<<"/"<<s[i]->dateDueGlobale()<<endl;
-
         curTime -= s[i]->getClient()->getDist();
     }
-
-    vector<Batch*> affichageSol = s;
-    reverse(affichageSol.begin(), affichageSol.end());
-    printSol(affichageSol,ev);
-
     return ev;
 }
 
@@ -696,7 +632,7 @@ float Probleme2::evaluerSolution_auto_noptr(vector<Batch> s) {
     curTime = s[0].dateDueGlobale() + s[0].getClient()->getDist();
     for (int i = 0; i < s.size(); ++i) {
 
-        ev += s[i].getClient()->getDist() *2*eta; /* On fait payer l'aler-retour */
+        ev += s[i].getClient()->getDist() *2*eta; /* On fait payer l'aller-retour */
 
         curTime -= s[i].getClient()->getDist();
 
@@ -712,10 +648,6 @@ float Probleme2::evaluerSolution_auto_noptr(vector<Batch> s) {
 
         curTime -= s[i].getClient()->getDist();
     }
-
-    vector<Batch> affichageSol = s;
-    reverse(affichageSol.begin(), affichageSol.end());
-    //printSol_noptr(affichageSol,ev);
 
     return ev;
 }
