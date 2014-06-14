@@ -216,17 +216,14 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 
 void Probleme2::solve_bruteforce(){
 
-	//solutionHeuristique();
-
-    //evalBestSol = 2320;
+	solutionHeuristique();
 
     vector<Batch> res(0);
     build_batches_bruteforce(res);
 	vector<Batch> curSol(0);
     float curEval = 0;
-	float curTime = 0; // On met à 0 pour l'initialiser à quelque chose, mais en réalité il sera instancié réellemet dans la résolution
 
-    //solve_bruteforce(curSol, res, curTime, curEval);
+    solve_bruteforce(curSol, res, curEval);
 
 }
 
@@ -276,7 +273,7 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
             /* On a toutes les combinaisons sous formes d'indice, maintenant il faut les ajouter aux combinaisons
              * Des batches. */
 
-            printCombinations(combinations,r);
+            //printCombinations(combinations,r);
 
             int l,m;
 
@@ -293,7 +290,6 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
     }
 
     cout<<"Recherche terminee.\n";
-    printCombinations(cur);
 }
 
 /* Supprime ls champs vite d'un vecteur */
@@ -343,26 +339,12 @@ vector<Produit*> Probleme2::getProdsClient(int num){
     return prods;
 }
 
-void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, float curTime, float curEval){
+void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float curEval){
 
-	/* Tous les produits sont inclus dans la solution : on peut la regarder */
-	if(res.size() == 0){
-        curEval = evaluerSolution_auto_noptr(curSol);
+    //printBatchs(curSol);
+    //printSol_noptr(curSol,curEval);
 
-        if(curEval < evalBestSol){
-            cout<<"Meilleure solution trouvee. On l'enregistre.\n";
-            reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
-            bestSol_noptr = curSol;
-            evalBestSol = curEval;
-            printBestSol_indo_noptr();
-
-        } else {
-            //cout<<"Pire solution, on oublie.\n";
-        }
-        return;
-    }
-
-	/* Mais il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
+	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
         curEval = evaluerSolution_auto_noptr(curSol);
         if(curEval > evalBestSol){
@@ -372,60 +354,106 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, flo
     }
 
 	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
-    vector<Produit*>::iterator it = res.begin();
+    vector<Batch>::iterator it = res.begin();
 
     while(it != res.end()){
-		Produit* tempProd = *it;
-        int toAdd = 0;
-		/* Ici, il faut regarder s'il y a moyen de faire une fusion ou non !! */
+		Batch tempBatch;
+
+        vector<Batch>::iterator it2 = it;
+
+        bool trouve = false;
+
+        while(it2 != res.end()){
+            Batch searchBatch = *it2;
+
+            if(!alreadyInSol(searchBatch,curSol)){
+                tempBatch = searchBatch;
+                trouve = true;
+                it = it2;
+                break;
+            }
+
+            ++it2;
+        }
+
+        /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
+        if(trouve == false){
+
+            if(allProdsInSol(curSol)){
+                curEval = evaluerSolution_auto_noptr(curSol);
+
+                if(curEval < evalBestSol){
+                    cout<<"Meilleure solution trouvee. On l'enregistre.\n";
+                    reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
+                    bestSol_noptr = curSol;
+                    evalBestSol = curEval;
+                    printBestSol_indo_noptr();
+
+                } else {
+                    //cout<<"Pire solution, on oublie.\n";
+                }
+            }
+
+            return;
+        }
 
         vector<Batch> newSol = curSol;
 
-        //printBatchs(newSol);
+        newSol.push_back(tempBatch);
+        vector<Batch> newRest = res;
+        removeBatch(newRest, tempBatch);
 
-        /* ICI, APRES AVOIR TROUVE LA PREMIERE SOLUTION, NEWSOL DEVRAIT ETRE VIDE !! */
+        //cout<<"\n\n__________________________\n";
+        //printBatchs(newRest);
+        /* supprimer AUSSI les batches avec des produits contenus dans le nouveau batch ajouté */
 
-		if(newSol.size() == 0){
-            /* C'est le premier batch à livrer, donc on cale la date courante en fonction de lui */
-            toAdd = 1;
-		} else {
-            /* On regarde si le batch envoyé plus tard (enfin avant, dans la solCur...)
-             * est est du même client que le produit qu'on vient de tirer dans res */
+        solve_bruteforce(newSol,newRest,curEval);
 
-             if(newSol[newSol.size()-1].getClient() == tempProd->getClient()){
-
-                /* A partir de là, il y a plusieurs choix :
-                    - en réalité (pour une vraie bruteforce), on devrait récurser sur les
-                        deux possibilités (fusion avec le batch ou pas)
-                    - pour accélérer les choses, pour le moment on l'ajoute juste au batch précédent */
-
-                if(newSol[newSol.size()-1].getProduits().size() < capa){ // on regarde s'il reste de la place dans le batch
-                    newSol[newSol.size()-1].addProduit(tempProd);
-
-                } else { // sinon on en créé un nouveau
-                    toAdd = 1;
-                }
-             } else { // si ce n'est pas le même client, idem, on créé un batch
-                toAdd = 1;
-             }
-		}
-
-		if(toAdd){
-            Batch temp = Batch(tempProd);
-            newSol.push_back(temp);
-		}
-
-        vector<Produit*> newRest = res;
-
-        removeProduct(newRest,tempProd);
-
-        /* Il faut rajouter ici le décallage de temps */
-
-        solve_bruteforce(newSol,newRest,curTime,curEval);
-        ++it;
+        it++;
     }
 }
 
+/* Regarde si tous les produits sont dans la solution */
+bool Probleme2::allProdsInSol(vector<Batch> sol){
+
+    int i,j,k;
+    int inSol;
+
+    for(i=0;i<produits.size();++i){
+        inSol = false;
+        for(j=0;j<sol.size();++j){
+            for(k=0;k<sol[j].getProduits().size();++k){
+                if(sol[j].getProduits()[k]->getNum() == produits[i]->getNum()){
+                    inSol = true;
+                }
+            }
+        }
+        if(!inSol)
+            return false;
+    }
+
+    return true;
+}
+
+/* Regarde si parmis les produits dans batch, il n'y en a pas un déjà dans sol */
+bool Probleme2::alreadyInSol(Batch batch,vector<Batch> sol){
+
+    int i,j,k;
+
+    int taille = batch.getProduits().size();
+
+    for(i=0;i<batch.getProduits().size();++i){
+        for(j=0;j<sol.size();++j){
+            for(k=0;k<sol[j].getProduits().size();++k){
+                if(sol[j].getProduits()[k]->getNum() == batch.getProduits()[i]->getNum()){
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 /* test d'une nouvelle solution de résolution. Algo :
  * - créer les batch comme d'habitude. Si un batch se voit livré plus tôt que sa date due, reprendre les batchs aux alentours
@@ -549,6 +577,53 @@ void Probleme2::removeBatch(vector<Batch*> &newRest,Batch* temp){
         }
     }
 
+}
+
+/* Supprime un batch d'une liste de batches
+    ainsi que tous les batches précédent
+    et tous les batches qui contiennent les mêmes
+    produits que dans le Batch temp (gros gros élagage)*/
+void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
+
+    vector<Batch>::iterator it;
+
+    /* Première état : on supprime tous les batches jusqu'à temp */
+    for(it=newRest.begin();it!=newRest.end();++it){
+        if(&(*it) == &temp){
+            newRest.erase(newRest.begin(), it);
+            break;
+        }
+    }
+
+    /* Seconde étatpe : on supprime les batches contenant  un ou plusieurs produits
+       similaires avec temp */
+
+    /*
+    it = newRest.begin();
+    while(it != newRest.end()){
+        if(sameProducts(temp,*it)){
+            it = newRest.erase(it);
+        } else {
+            ++it;
+        }
+    } */
+
+}
+
+/* Regarde si deux batches ont des produits similaires (1 seul suffit pour renvoyer true */
+bool Probleme2::sameProducts(Batch batch1,Batch batch2){
+
+    int i,j;
+
+    for(i=0;i<batch1.getProduits().size();++i){
+        for(j=0;j<batch2.getProduits().size();++j){
+            if(batch1.getProduits()[i]->getNum() == batch2.getProduits()[j]->getNum()){
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 /* Supprime le produit p de la liste de produits plist */
