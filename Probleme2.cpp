@@ -216,7 +216,7 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 
 void Probleme2::solve_bruteforce(){
 
-	//solutionHeuristique();
+	solutionHeuristique();
 
     vector<Batch> res(0);
     build_batches_bruteforce(res);
@@ -232,7 +232,7 @@ void Probleme2::solve_bruteforce(){
      * vraiment plus efficace ou non*/
 
     sort(res.begin(), res.end(),
-         Tools::comparatorBatchDateDue);
+         Tools::comparatorBatchLength);
 
     solve_bruteforce(curSol, res,curTime, curEval);
 

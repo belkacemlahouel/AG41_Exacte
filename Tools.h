@@ -38,6 +38,11 @@ class Tools {
 			return b1.getClient()->coutUnitaireStockage() < b2.getClient()->coutUnitaireStockage();
 		};
 
+		static bool comparatorBatchLength(Batch b1, Batch b2) {
+			// cout << "batchptr comparator" << endl;
+			return b1.getProduits().size() > b2.getProduits().size() ;
+		};
+
         static bool comparatorProduitPtrDateDueDec(Produit* p1, Produit* p2) {
             return !comparatorProduitPtrDateDue(p1, p2);
         };
