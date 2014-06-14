@@ -220,13 +220,120 @@ void Probleme2::solve_bruteforce(){
 
     //evalBestSol = 2320;
 
+    vector<Batch> res(0);
+    build_batches_bruteforce(res);
 	vector<Batch> curSol(0);
-	vector<Produit*> res = produits;
     float curEval = 0;
 	float curTime = 0; // On met à 0 pour l'initialiser à quelque chose, mais en réalité il sera instancié réellemet dans la résolution
 
-    solve_bruteforce(curSol, res, curTime, curEval);
+    //solve_bruteforce(curSol, res, curTime, curEval);
 
+}
+
+/* Fait tous les batches possibles */
+void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
+
+    int i;
+
+    cout<<"Recherche de toutes les combinaisons de batches...\n";
+
+    for(i=0;i<clients.size();++i){
+
+        vector<Produit*> prodsClient = getProdsClient(i+1);
+        //cout<<"Produits du client "<<(i+1)<<" :\n";
+        //printProduits(prodsClient);
+
+        int k;
+        int limit;
+
+        if (capa > prodsClient.size()) limit = prodsClient.size();
+        else limit = capa;
+
+        for(k = 0;k<limit;++k){
+
+            int n = prodsClient.size(); // nb produits
+            int r = k+1;
+            vector<int*> combinations;
+
+
+            std::vector<bool> v(n);
+            std::fill(v.begin() + n - r, v.end(), true);
+            int j;
+            do {
+                j = 0;
+                int* ptr = new int[n];
+                for (int i = 0; i < n; ++i) {
+                    if (v[i]) {
+                        ptr[j] = i;
+                        ++j;
+                        //std::cout << (i+1) << " ";
+                    }
+                }
+                //std::cout << "\n";
+                combinations.push_back(ptr);
+            } while (std::next_permutation(v.begin(), v.end()));
+
+            /* On a toutes les combinaisons sous forces d'indice, maintenant il faut les ajouter aux combinaisons
+             * Des batches. */
+
+            //for(j=0;j<)
+
+            printCombinations(combinations,r);
+        }
+    }
+
+    cout<<"Recherche terminee.\n";
+    printCombinations(cur);
+}
+
+/* Supprime ls champs vite d'un vecteur */
+void Probleme2::removeEmptyFields(vector<Produit*> &ptr){
+
+    vector<Produit*>::iterator it = ptr.begin();
+
+    while(it != ptr.end()){
+
+        if(*it == NULL){
+            it = ptr.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void Probleme2::printCombinations(vector<Batch> combs){
+
+    int i,j;
+
+    for(j=0;j<combs.size();++j){
+        printBatchs(combs);
+    }
+}
+
+void Probleme2::printCombinations(vector<int*> combs,int r){
+
+    int i,j;
+
+    for(j=0;j<combs.size();++j){
+        cout<<"[";
+        for(i=0;i<r;++i){
+            cout<<" "<<combs[j][i]<<" ";
+        }
+        cout<<"]\n";
+    }
+}
+
+vector<Produit*> Probleme2::getProdsClient(int num){
+
+    vector<Produit*> prods;
+
+    int i;
+    for(i = 0;i<produits.size();++i){
+        if(produits[i]->getClient()->getNum() == num){
+            prods.push_back(produits[i]);
+        }
+    }
+    return prods;
 }
 
 void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, float curTime, float curEval){

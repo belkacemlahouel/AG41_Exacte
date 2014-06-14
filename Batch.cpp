@@ -9,6 +9,12 @@ Batch::Batch(Produit* p) {
 	date_livraison = 0;
 }
 
+Batch::Batch(vector<Produit*> plist) {
+	// Pas besoin d'allouer de la mémoire au vector ?
+	produits = plist;
+	date_livraison = 0;
+}
+
 int Batch::size() {
 	return produits.size();
 }

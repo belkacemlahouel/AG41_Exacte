@@ -54,6 +54,11 @@ private:
     float evaluerSolution_auto_noptr(vector<Batch> s);
     void removeProduct(vector<Produit*> &plist, Produit* p);
     void removeBatch(vector<Batch*> &newRest,Batch* temp);
+    void build_batches_bruteforce(vector<Batch> &cur);
+    vector<Produit*> getProdsClient(int num);
+    void printCombinations(vector<Batch> combs);
+    void printCombinations(vector<int*> combs,int r);
+    void removeEmptyFields(vector<Produit*> &ptr);
     void solve_bruteforce(vector<Batch> curSol, vector<Produit*> res, float curTime, float curEval);
 
 public:

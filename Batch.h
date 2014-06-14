@@ -15,6 +15,7 @@ class Batch{
 
 	public:
 		Batch(Produit*);
+		Batch(vector<Produit*> plist);
 		Batch();
 		~Batch(){}
 		void printBatch();
