@@ -216,7 +216,7 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 
 void Probleme2::solve_bruteforce(){
 
-	solutionHeuristique();
+	//solutionHeuristique();
 
     vector<Batch> res(0);
     build_batches_bruteforce(res);
@@ -344,6 +344,25 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float 
     //printBatchs(curSol);
     //printSol_noptr(curSol,curEval);
 
+    /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
+    if(res.size() == 0){
+
+                curEval = evaluerSolution_auto_noptr(curSol);
+
+                if(curEval < evalBestSol){
+                    cout<<"Meilleure solution trouvee. On l'enregistre.\n";
+                    reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
+                    bestSol_noptr = curSol;
+                    evalBestSol = curEval;
+                    printBestSol_indo_noptr();
+
+                } else {
+                    //cout<<"Pire solution, on oublie.\n";
+                }
+
+            return;
+    }
+
 	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
         curEval = evaluerSolution_auto_noptr(curSol);
@@ -357,45 +376,7 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res, float 
     vector<Batch>::iterator it = res.begin();
 
     while(it != res.end()){
-		Batch tempBatch;
-
-        vector<Batch>::iterator it2 = it;
-
-        bool trouve = false;
-
-        while(it2 != res.end()){
-            Batch searchBatch = *it2;
-
-            if(!alreadyInSol(searchBatch,curSol)){
-                tempBatch = searchBatch;
-                trouve = true;
-                it = it2;
-                break;
-            }
-
-            ++it2;
-        }
-
-        /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
-        if(trouve == false){
-
-            if(allProdsInSol(curSol)){
-                curEval = evaluerSolution_auto_noptr(curSol);
-
-                if(curEval < evalBestSol){
-                    cout<<"Meilleure solution trouvee. On l'enregistre.\n";
-                    reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
-                    bestSol_noptr = curSol;
-                    evalBestSol = curEval;
-                    printBestSol_indo_noptr();
-
-                } else {
-                    //cout<<"Pire solution, on oublie.\n";
-                }
-            }
-
-            return;
-        }
+		Batch tempBatch = *it;
 
         vector<Batch> newSol = curSol;
 
@@ -587,10 +568,10 @@ void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
 
     vector<Batch>::iterator it;
 
-    /* Première état : on supprime tous les batches jusqu'à temp */
+    /* Première étape : on supprime temp */
     for(it=newRest.begin();it!=newRest.end();++it){
         if(&(*it) == &temp){
-            newRest.erase(newRest.begin(), it);
+            newRest.erase(it);
             break;
         }
     }
@@ -598,7 +579,6 @@ void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
     /* Seconde étatpe : on supprime les batches contenant  un ou plusieurs produits
        similaires avec temp */
 
-    /*
     it = newRest.begin();
     while(it != newRest.end()){
         if(sameProducts(temp,*it)){
@@ -606,7 +586,7 @@ void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
         } else {
             ++it;
         }
-    } */
+    }
 
 }
 
