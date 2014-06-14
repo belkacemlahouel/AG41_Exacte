@@ -28,6 +28,11 @@ class Tools {
 			return b1->dateDueGlobale() < b2->dateDueGlobale();
 		};
 
+		static bool comparatorBatchDateDue(Batch b1, Batch b2) {
+			// cout << "batchptr comparator" << endl;
+			return b1.dateDueGlobale() > b2.dateDueGlobale();
+		};
+
         static bool comparatorProduitPtrDateDueDec(Produit* p1, Produit* p2) {
             return !comparatorProduitPtrDateDue(p1, p2);
         };

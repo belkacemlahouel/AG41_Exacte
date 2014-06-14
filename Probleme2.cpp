@@ -223,6 +223,19 @@ void Probleme2::solve_bruteforce(){
 	vector<Batch> curSol(0);
     float curEval = 0;
 
+    //cout<<"BATCHES SANS TRI : \n";
+    //printBatchs(res);
+
+    /* Tri des batches pour une meilleure efficacité
+     * Il faudra se poser la question de savoir si c'est
+     * vraiment plus efficace ou non*/
+
+    sort(res.begin(), res.end(),
+         Tools::comparatorBatchDateDue);
+
+    //cout<<"BATCHES AVEC TRI : \n";
+    //printBatchs(res);
+
     solve_bruteforce(curSol, res, curEval);
 
 }
