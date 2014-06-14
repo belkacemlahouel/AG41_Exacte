@@ -222,6 +222,7 @@ void Probleme2::solve_bruteforce(){
     build_batches_bruteforce(res);
 	vector<Batch> curSol(0);
     float curEval = 0;
+    float curTime = 0;
 
     //cout<<"BATCHES SANS TRI : \n";
     //printBatchs(res);
@@ -233,7 +234,7 @@ void Probleme2::solve_bruteforce(){
     sort(res.begin(), res.end(),
          Tools::comparatorBatchDateDue);
 
-    solve_bruteforce(curSol, res);
+    solve_bruteforce(curSol, res,curTime, curEval);
 
 }
 
@@ -349,13 +350,10 @@ vector<Produit*> Probleme2::getProdsClient(int num){
     return prods;
 }
 
-void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res){
-
-    float curEval = 0;
+void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
 
     /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
     if(res.size() == 0){
-                curEval = evaluerSolution_auto_noptr(curSol);
                 if(curEval < evalBestSol){
                     cout<<"Meilleure solution trouvee. On l'enregistre.\n";
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
@@ -371,7 +369,6 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res){
 
 	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
-        curEval = evaluerSolution_auto_noptr(curSol);
         if(curEval > evalBestSol){
             //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
             return;
@@ -390,7 +387,27 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res){
         vector<Batch> newRest = res;
         removeBatch(newRest, tempBatch);
 
-        solve_bruteforce(newSol,newRest);
+        float newTime = curTime;
+        float newEval = curEval;
+
+        /* Calcul du temps et des coûts */
+        if(newSol.size() == 1){
+            newTime = newSol[0].dateDueGlobale();
+            newEval = newSol[0].coutStockage(newTime);
+            newEval += newSol[0].getClient()->getDist()*2*eta;
+            newTime -= newSol[0].getClient()->getDist();
+        } else {
+            int indice = newSol.size() - 1;
+            newTime -= newSol[indice].getClient()->getDist();
+            if(newTime > newSol[indice].dateDueGlobale()){
+                newTime = newSol[indice].dateDueGlobale();
+            }
+            newEval += newSol[indice].getClient()->getDist()*2*eta;
+            newEval += newSol[indice].coutStockage(newTime);
+            newTime -= newSol[indice].getClient()->getDist();
+        }
+
+        solve_bruteforce(newSol,newRest,newTime,newEval);
 
         it++;
     }
