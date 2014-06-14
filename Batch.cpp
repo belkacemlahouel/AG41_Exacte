@@ -95,4 +95,12 @@ float Batch::getDate_livraison(){
     return date_livraison;
 }
 
+void Batch::computeCoutStockageCourant(float date) {
+    cout_st_cour = coutStockage(date);
+}
+
+float Batch::coutStockageCourant() {
+    return cout_st_cour;
+}
+
 

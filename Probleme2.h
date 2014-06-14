@@ -37,7 +37,17 @@ private:
     void solve(vector<Batch*> cur, vector<Produit*> reste);
     float evaluerSolution(vector<Batch*>);
     bool livraisonImmediate(Produit*);
-
+    
+//    // Fonction de comparaison pour les batchs
+//    bool comparatorBatchCoutStockageDate(Batch b1, Batch b2) {
+//        return b1.coutStockage(dateCourante) > b2.coutStockage(dateCourante);
+//    };
+//    
+//    // Fonction de comparaison pour les batchs
+//    bool comparatorBatchPtrCoutStockageDate(Batch* b1, Batch* b2) {
+//        return b1->coutStockage(dateCourante) > b2->coutStockage(dateCourante);
+//    };
+    void computeCoutsStockageCourants(vector<Batch>, float);
 
     /* Fonctions pour solution by indo : */
 

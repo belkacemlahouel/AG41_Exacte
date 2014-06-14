@@ -378,6 +378,15 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
     vector<Batch>::iterator it = res.begin();
 
+    
+    // Modifs belka : ajout d'un tri sur les batchs restants
+    // Est-ce que c'est vraiment là qu'on le mets ?...
+    computeCoutsStockageCourants(res, curTime);
+    sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
+    
+    
+    
+    
     while(it != res.end()){
 		Batch tempBatch = *it;
 
@@ -737,6 +746,9 @@ void Probleme2::solve() {
 //    for (int i = 0; i < bestSol.size(); ++i) {
 //        bestSol[i]->printBatch();
 //    }
+    
+//    sort(bestSol.begin(), bestSol.end(),
+//         Tools::comparatorBatchPtrCoutStockageCourant);
 }
 
 // bestSol -> vector(#produits) et on utilise (int) iter ?
@@ -885,7 +897,11 @@ bool Probleme2::livraisonImmediate(Produit* p) {
 
 
 
-
+void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {
+    for (int i = 0; i < reste.size(); ++i) {
+        reste[i].computeCoutStockageCourant(date);
+    }
+}
 
 
 

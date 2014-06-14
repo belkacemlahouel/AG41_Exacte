@@ -9,6 +9,7 @@ using namespace std;
 
 class Tools {
 	public:
+    
 		// Vider un vector<T>
 		template<class T> static void viderVector(vector<T> vect) {
 			while (vect.size() > 0) {
@@ -49,6 +50,18 @@ class Tools {
 
         static bool comparatorBatchPtrDateDueDec(Batch* b1, Batch* b2) {
             return !comparatorBatchPtrDateDue(b1, b2);
+        };
+    
+    
+    
+    
+        // ATTENTION, ne pas oublier de màj les couts de stockages courants
+        // Pour les produits des batchs concernés par le tri
+        static bool comparatorBatchPtrCoutStockageCourant(Batch* b1, Batch* b2) {
+            return b1->coutStockageCourant()>b2->coutStockageCourant();
+        };
+        static bool comparatorBatchCoutStockageCourant(Batch b1, Batch b2) {
+            return b1.coutStockageCourant()>b2.coutStockageCourant();
         };
 };
 
