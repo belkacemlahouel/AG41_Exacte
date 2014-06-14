@@ -273,12 +273,22 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                 combinations.push_back(ptr);
             } while (std::next_permutation(v.begin(), v.end()));
 
-            /* On a toutes les combinaisons sous forces d'indice, maintenant il faut les ajouter aux combinaisons
+            /* On a toutes les combinaisons sous formes d'indice, maintenant il faut les ajouter aux combinaisons
              * Des batches. */
 
-            //for(j=0;j<)
-
             printCombinations(combinations,r);
+
+            int l,m;
+
+            for(l=0;l<combinations.size();++l){
+                Batch temp = Batch();
+                for(m=0;m<r;++m){
+                    temp.addProduit(prodsClient[combinations[l][m]]);
+                }
+                if(temp.size() > 0)
+                    cur.push_back(temp);
+            }
+
         }
     }
 
@@ -304,10 +314,7 @@ void Probleme2::removeEmptyFields(vector<Produit*> &ptr){
 void Probleme2::printCombinations(vector<Batch> combs){
 
     int i,j;
-
-    for(j=0;j<combs.size();++j){
-        printBatchs(combs);
-    }
+    printBatchs(combs);
 }
 
 void Probleme2::printCombinations(vector<int*> combs,int r){

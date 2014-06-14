@@ -1,6 +1,7 @@
 #include "Batch.h"
 
 Batch::Batch() {
+    date_livraison = 0;
 }
 
 Batch::Batch(Produit* p) {
