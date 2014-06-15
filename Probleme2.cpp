@@ -378,15 +378,12 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
     vector<Batch>::iterator it = res.begin();
 
-    
+
     // Modifs belka : ajout d'un tri sur les batchs restants
     // Est-ce que c'est vraiment là qu'on le mets ?...
     computeCoutsStockageCourants(res, curTime);
     sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
-    
-    
-    
-    
+
     while(it != res.end()){
 		Batch tempBatch = *it;
 
@@ -401,15 +398,15 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
         /* Calcul du temps et des coûts */
         if(newSol.size() == 1){
-            newTime = newSol[0].dateDueGlobale();
+            newTime = newSol[0].getDateGlobale();
             newEval = newSol[0].coutStockage(newTime);
             newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
             int indice = newSol.size() - 1;
             newTime -= newSol[indice].getClient()->getDist();
-            if(newTime > newSol[indice].dateDueGlobale()){
-                newTime = newSol[indice].dateDueGlobale();
+            if(newTime > newSol[indice].getDateGlobale()){
+                newTime = newSol[indice].getDateGlobale();
             }
             newEval += newSol[indice].getClient()->getDist()*2*eta;
             newEval += newSol[indice].coutStockage(newTime);
@@ -746,7 +743,7 @@ void Probleme2::solve() {
 //    for (int i = 0; i < bestSol.size(); ++i) {
 //        bestSol[i]->printBatch();
 //    }
-    
+
 //    sort(bestSol.begin(), bestSol.end(),
 //         Tools::comparatorBatchPtrCoutStockageCourant);
 }
@@ -815,7 +812,7 @@ void Probleme2::solve(vector<Batch*> cur, vector<Produit*> res) {
 
 // On suppose une heuristique vraiment nulle... Vision pessimiste
 void Probleme2::solutionHeuristique() {
-    evalBestSol = 99999999999;
+    evalBestSol = 999999999;
 }
 
 bool Probleme2::encorePossible(vector<Batch*> reste) {

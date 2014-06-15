@@ -13,6 +13,7 @@ class Batch{
 		vector<Produit*> produits;
 		float date_livraison;       // la date à laquelle a été livré le batch
         float cout_st_cour;         // Cout de stockage courant
+        float dateGlobale;
 
 	public:
 		Batch(Produit*);
@@ -33,7 +34,9 @@ class Batch{
 
         void setDate_livraison(float date);
         float getDate_livraison();
-    
+
+        float getDateGlobale();
+
         void computeCoutStockageCourant(float date);
         float coutStockageCourant();
 };

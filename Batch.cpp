@@ -2,18 +2,21 @@
 
 Batch::Batch() {
     date_livraison = 0;
+    dateGlobale = 0;
 }
 
 Batch::Batch(Produit* p) {
 	// Pas besoin d'allouer de la mémoire au vector ?
 	produits.push_back(p);
 	date_livraison = 0;
+	dateGlobale = dateDueGlobale();
 }
 
 Batch::Batch(vector<Produit*> plist) {
 	// Pas besoin d'allouer de la mémoire au vector ?
 	produits = plist;
 	date_livraison = 0;
+	dateGlobale = dateDueGlobale();
 }
 
 int Batch::size() {
@@ -30,6 +33,7 @@ Client* Batch::getClient() {
 
 void Batch::addProduit(Produit* p) {
 	produits.push_back(p);
+	dateGlobale = dateDueGlobale();
 }
 
 /* la date due globale est la date due minimum entre toutes les dates dues de tous les jobs du batch */
@@ -101,6 +105,10 @@ void Batch::computeCoutStockageCourant(float date) {
 
 float Batch::coutStockageCourant() {
     return cout_st_cour;
+}
+
+float Batch::getDateGlobale(){
+    return dateGlobale;
 }
 
 
