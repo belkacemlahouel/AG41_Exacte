@@ -318,25 +318,6 @@ void Probleme2::removeEmptyFields(vector<Produit*> &ptr){
     }
 }
 
-void Probleme2::printCombinations(vector<Batch> combs){
-
-    int i,j;
-    printBatchs(combs);
-}
-
-void Probleme2::printCombinations(vector<int*> combs,int r){
-
-    int i,j;
-
-    for(j=0;j<combs.size();++j){
-        cout<<"[";
-        for(i=0;i<r;++i){
-            cout<<" "<<combs[j][i]<<" ";
-        }
-        cout<<"]\n";
-    }
-}
-
 vector<Produit*> Probleme2::getProdsClient(int num){
 
     vector<Produit*> prods;
@@ -381,8 +362,8 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
     // Modifs belka : ajout d'un tri sur les batchs restants
     // Est-ce que c'est vraiment là qu'on le mets ?...
-    computeCoutsStockageCourants(res, curTime);
-    sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
+    //computeCoutsStockageCourants(res, curTime);
+    //sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
 
     while(it != res.end()){
 		Batch tempBatch = *it;
@@ -569,7 +550,7 @@ void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
 
 }
 
-/* Regarde si deux batches ont des produits similaires (1 seul suffit pour renvoyer true */
+/* Regarde si deux batches ont des produits en commun (1 seul suffit pour renvoyer true) */
 bool Probleme2::sameProducts(Batch batch1,Batch batch2){
 
     int i,j;
@@ -581,7 +562,6 @@ bool Probleme2::sameProducts(Batch batch1,Batch batch2){
             }
         }
     }
-
     return false;
 }
 
@@ -638,40 +618,6 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
         ev += tempCoutStock;
         curTime -= s[i]->getClient()->getDist();
     }
-    return ev;
-}
-
-/* Contrairement à evaluerSolution, cette fonction va évaluer la solution donnée en reconstruisant
-   lui même la timeline de livraison à partir d'une liste de batch. Elle n'a donc pas besoin de dateCourante
-   /!\ CONTRAIREMENT A EVALUERSOLUTION, CETTE EVALUATION SE FAIT EN BACKTRACK /!\ */
-float Probleme2::evaluerSolution_auto_noptr(vector<Batch> s) {
-
-    float curTime = 0;
-    //cout << "Evaluation solution"<<endl;
-    //cout << "Detail de la solution :\n";
-
-    float ev = 0;
-    /* La date de départ est la date de livraison du dernier batch + le temps de retour a l'entrepôt */
-    curTime = s[0].dateDueGlobale() + s[0].getClient()->getDist();
-    for (int i = 0; i < s.size(); ++i) {
-
-        ev += s[i].getClient()->getDist() *2*eta; /* On fait payer l'aller-retour */
-
-        curTime -= s[i].getClient()->getDist();
-
-        /* Si la date de livraison est trop tôt pour le client, il faut attendre à l'entrepôt pour ne pas l'amener trop tôt */
-        if(curTime > s[i].dateDueGlobale()){
-            curTime = s[i].dateDueGlobale();
-        }
-
-        float tempCoutStock = s[i].coutStockage(curTime);
-        s[i].setDate_livraison(curTime);
-        ev += tempCoutStock;
-        //cout<<"Batch pour client "<<s[i].getProduits()[0]->getClient()->getNum()<<", Cout stockage :  "<<tempCoutStock<<"\n\tDate : "<<curTime<<"/"<<s[i].dateDueGlobale()<<endl;
-
-        curTime -= s[i].getClient()->getDist();
-    }
-
     return ev;
 }
 
@@ -891,15 +837,8 @@ bool Probleme2::livraisonImmediate(Produit* p) {
     return (maintenant > apres);
 }
 
-
-
-
 void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {
     for (int i = 0; i < reste.size(); ++i) {
         reste[i].computeCoutStockageCourant(date);
     }
 }
-
-
-
-
