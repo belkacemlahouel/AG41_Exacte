@@ -459,11 +459,16 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
         float newTime = curTime;
         float newEval = curEval;
 
+        // Comptage des batchs déjà livrés, jusque là
+        int num = newSol[0].getClient()->getNum();
+        ++nbBatchsUsed[num-1];
+
         /* Calcul du temps et des coûts */
         if(newSol.size() == 1){
-            newTime = newSol[0].getDateGlobale();
+            newTime = newSol[0].getDateGlobale(); // FAUX ? min(dateDue-retour, dateGlobale-aller/retour) ?... Je sais pas en fait... Ca corresponds à quoi ?
             newEval = newSol[0].coutStockage(newTime);
-            newEval += newSol[0].getClient()->getDist()*2*eta;
+            if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
+                newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
             int indice = newSol.size() - 1;
@@ -471,7 +476,8 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
             if(newTime > newSol[indice].getDateGlobale()){
                 newTime = newSol[indice].getDateGlobale();
             }
-            newEval += newSol[indice].getClient()->getDist()*2*eta;
+            if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
+                newEval += newSol[indice].getClient()->getDist()*2*eta;
             newEval += newSol[indice].coutStockage(newTime);
             newTime -= newSol[indice].getClient()->getDist();
         }
@@ -1014,7 +1020,7 @@ void Probleme2::computeCoutMini() {
         while ((i+j) < produits.size() && j < capa && produits[i+j]->getClient()->getNum() == num) {
             ++j;
         }
-        
+
         i += j;
     }
     // coutMini = coutMini/3;
