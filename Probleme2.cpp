@@ -13,6 +13,14 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
 	evalBestSol = 0;
 
 	dateCourante = 0.0f;
+
+    nbBatchsMini = new int[clients.size()];
+    nbBatchsUsed = new int[clients.size()];
+
+    for (int i = 0; i < clients.size(); ++i) {
+        nbBatchsUsed[i] = 0;
+        nbBatchsMini[i] = 0;
+    }
 }
 
 // Instance avec appel parseur
@@ -89,6 +97,9 @@ Probleme2::~Probleme2() {
 	Tools::viderVector(produits);
 	Tools::viderVector(batchs);
     // Prends directement en compte les delete pour le parser, normalement
+
+    delete[] nbBatchsUsed;
+    delete[] nbBatchsMini;
 }
 
 // Printings
@@ -242,6 +253,11 @@ void Probleme2::solve_bruteforce(){
 
     solve_bruteforce(curSol, res,curTime, curEval);
 
+
+    for (int i = 0; i < clients.size(); ++i) {
+        cout << "Nombre de batchs mini pour le client " << clients[i]->getNum();
+        cout << " = " << nbBatchsMini[i] << endl;
+    }
 }
 
 /* Fait tous les batches possibles */
@@ -398,7 +414,10 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
                     bestSol_noptr = curSol;
                     evalBestSol = curEval;
-                    printBestSol_indo_noptr();
+
+                    // A corriger, sinon segfault...
+                    //if (bestSol_noptr.size() > 0)
+                        printBestSol_indo_noptr();
 
                 } else {
                     //cout<<"Pire solution, on oublie.\n";
@@ -982,16 +1001,23 @@ void Probleme2::computeCoutMini() {
     sort(produits.begin(), produits.end(),
         Tools::comparatorProduitPtrClientDateDue);
 
+    cout << "Capacité du transporteur : " << capa << endl;
+    printProduits();
+
     for (int i = 0; i < produits.size(); ++i) {
         coutMini += produits[i]->getClient()->getDist()*2*eta;
 
         int j = 0;
-        // while ((i+j) < produits.size() && j < capa && produits[i+j]->getClient()->getNum() == produits[i]->getClient()->getNum()) {
-        //     ++j;
-        // }
+        int num = produits[i]->getClient()->getNum();
+        ++nbBatchsMini[num-1];
+
+        while ((i+j) < produits.size() && j < capa && produits[i+j]->getClient()->getNum() == num) {
+            ++j;
+        }
+        
         i += j;
     }
-    coutMini = coutMini/2;
+    // coutMini = coutMini/3;
 }
 
 

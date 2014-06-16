@@ -52,6 +52,9 @@ private:
     void computeCoutMini();
     float coutMini;
     void heuristique4000(vector<Produit*>);
+    int* nbBatchsMini;
+    int* nbBatchsUsed;
+
 
     /* Fonctions pour solution by indo : */
 
