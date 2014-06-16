@@ -30,17 +30,19 @@ int main(int argc, char** argv) {
     if (argc == 2) {
         p = new Probleme2(argv[1]);
     } else {
-        p = new Probleme2(/*"instances/instance15n2cl.txt"*/);
-        // p = new Probleme2();
+        // p = new Probleme2("instances/instance15n2cl.txt");
+        p = new Probleme2();
     }
 
-    p->printBatchs();
-    // p->solve();
-    //p->solve_indo();
-    //p->printBestSol_indo();
-    p->solve_bruteforce();
-    // p->printBestSol();
-    p->printBestSol_indo_noptr();
+    // p->printBatchs();
+    // // p->solve();
+    // p->solve_indo();
+    // //p->printBestSol_indo();
+    // p->solve_bruteforce();
+    // // p->printBestSol();
+    // p->printBestSol_indo_noptr();
+
+    p->solve();
 
     delete(p);
     cout << "------ Bye World! ------" << endl;

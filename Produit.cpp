@@ -24,5 +24,6 @@ float Produit::coutStockage(float t) {
 }
 
 void Produit::printProduit() {
-	cout << "\tProduit " << getNum() << ", Date due : " << dateDue() << "\n";
+	cout << "\tProduit " << getNum() << ", Date due : " << dateDue();
+	cout << " pour Client " << getClient()->getNum() << "\n";
 }

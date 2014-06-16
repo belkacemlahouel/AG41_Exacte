@@ -231,8 +231,10 @@ void Probleme2::solve_bruteforce(){
      * Il faudra se poser la question de savoir si c'est
      * vraiment plus efficace ou non*/
 
+    computeCoutsStockageCourantsInit(res);
     sort(res.begin(), res.end(),
-         Tools::comparatorBatchLength);
+        // Tools::comparatorBatchCoutStockageCourantDec); // FOIREUX
+        Tools::comparatorBatchLength);
 
     solve_bruteforce(curSol, res,curTime, curEval);
 
@@ -740,6 +742,10 @@ void Probleme2::solve() {
     vector<Produit*> res = produits;
     solve(cur, res);
 
+    // -------
+    // heuristique4000(produits);
+    // -------
+
 //    for (int i = 0; i < bestSol.size(); ++i) {
 //        bestSol[i]->printBatch();
 //    }
@@ -899,6 +905,75 @@ void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {
         reste[i].computeCoutStockageCourant(date);
     }
 }
+
+void Probleme2::computeCoutsStockageCourantsInit(vector<Batch> reste) {
+    for (int i = 0; i < reste.size(); ++i) {
+        reste[i].computeCoutStockageCourant(reste[i].getDateGlobale());
+    }
+}
+
+
+
+
+
+
+
+
+
+// Encore une heuristique
+// Tant qu'il reste des produits à livrer
+//      On les trie par ordre de clients ASC
+//      On trie par date due (on suppose le tri stable...) DEC
+//      On regarde pour chaque client, le produit le plus tardif -> batch
+//          On regarde les autres, voir si ils doivent être ajoutés ou pas
+//              Selon juste un critère : si on a le temps de faire l'AR ou pas
+//          
+//      On regarde classe les batchs obtenus par couts de stockage DEC
+// On commence par le dernier, jusqu'au premier
+//      On livre le dernier à min(dc-AR, dd - A) et on calcule eval
+
+// -----
+// cs(produit k) = tho(client i)*eta + (dd-dc-tho(client i))*beta(client i)
+// après livraison chez client i : dc <- min(dc-2*tho(client i), dd-tho(client i))
+// initialisation de la dc <- 999999 (inf)
+//                 puis dc <- [formule] mais on prends la supposée dd(batch sélectionné)
+// -----
+void Probleme2::heuristique4000(vector<Produit*> _p) {
+    // vector<Produit*> p;
+    // p.assign(_p.begin(), _p.end());
+
+    // sort(p.begin(), p.end(), Tools::comparatorProduitPtrClientDateDue);
+
+    // // for (int i = 0; i < p.size(); ++i) {
+    // //     p[i]->printProduit();
+    // // }
+
+    // vector<Batch*> b;
+
+    // // on fait les batchs de manière bidon (à améliorer)
+    // // on ajoute à chaque fois qu'on est obligés à cause d'un AR trop grand
+    // for (int i = 0; i < p.size(); ++i) {
+    //     Batch* tmp = new Batch(p[i]);
+    //     while (i+1 < p.size() && tmp->getClient()->getNum() == p[i+1]->getClient()->getNum()
+    //             && tmp->getDateGlobale() < { // tant que la date est inférieure à AR/2 ? = A
+    //         if () { // inférieur à AR on ajoute
+    //             tmp.addProduit(p[i+1]);
+    //         }
+    //         ++i;
+    //     }
+    //     b.push_back(tmp);
+    // }
+
+    // // DU COUP on a tous les batchs c'est cool ma poule, heuristique sisi
+
+    // // et on peut alors parler du tri des batchs sur les couts de stockages en fonction de la date due
+
+    // // on affiche la solution trouvée + évaluation
+}
+
+
+
+
 
 
 
