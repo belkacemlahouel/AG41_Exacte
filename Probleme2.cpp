@@ -233,8 +233,9 @@ void Probleme2::solve_bruteforce(){
 
     computeCoutsStockageCourantsInit(res);
     sort(res.begin(), res.end(),
-        // Tools::comparatorBatchCoutsStockageCourantsDec); // FOIREUX
-        Tools::comparatorBatchLength);
+        Tools::comparatorBatchLength);                      // Tri 1
+        // Tools::comparatorBatchCoutsStockageCourantsDec); // Tri 2
+
 
     solve_bruteforce(curSol, res,curTime, curEval);
 
