@@ -233,8 +233,10 @@ void Probleme2::solve_bruteforce(){
 
     computeCoutsStockageCourantsInit(res);
     sort(res.begin(), res.end(),
-        Tools::comparatorBatchLength);                      // Tri 1
-        // Tools::comparatorBatchCoutsStockageCourantsDec); // Tri 2
+        // Tools::comparatorBatchLengthDec);                    // Tri 1
+        // Tools::comparatorBatchCoutsStockageCourantsDec);     // Tri 2
+        // Tools::comparatorBatchLengthDecDateDueGlobaleDec);   // Tri 3
+        Tools::comparatorCoefSpecial);
 
 
     solve_bruteforce(curSol, res,curTime, curEval);
@@ -264,7 +266,7 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
         if (capa > prodsClient.size()) limit = prodsClient.size();
         else limit = capa;
 
-        for(k = 0;k<limit;++k){
+        for(k=limit-1;k>=0;--k){ // k = 0;k<limit;++k
 
             int n = prodsClient.size(); // nb produits
             int r = k+1;
@@ -290,7 +292,7 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                  * comme [0,2,1] qui feraient échouer isUseless */
                 Tools::bubbleSort(ptr,r);
 
-                if(!isUseless(ptr,r)){
+                if(!isUseless(ptr,r)){ // C'est QUOI CE PUTAIN DE R ?
                     combinations.push_back(ptr);
                 }
             } while (std::next_permutation(v.begin(), v.end()));
@@ -329,7 +331,7 @@ bool Probleme2::isUseless(int* permut, int r){
 
     int i;
     for(i=0;i<r-1;++i){
-        if(permut[i+1]-permut[i] != 1){
+        if(permut[i+1]-permut[i] > 1){ // What if the products for one client are not in order.. Meaning that we could have P1C1 P2C2 P3C1 and this condition is validated but for this client C1, P1 and P3 follow each other!
             return true;
         }
     }
@@ -411,9 +413,11 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
     // Modifs belka : ajout d'un tri sur les batchs restants
     // Est-ce que c'est vraiment là qu'on le mets ?...
-    // if (curSol > 0) {
-    //      computeCoutsStockageCourants(res, curTime);
-    //      sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
+    // if (curSol.size() > 0) {
+    //     computeCoutsStockageCourants(res, curTime);
+    //     sort(res.begin(), res.end(),
+    //         Tools::comparatorCoefSpecial);
+    //         // Tools::comparatorBatchCoutStockageCourant);
     // }
 
     while(it != res.end()){

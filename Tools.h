@@ -39,9 +39,21 @@ class Tools {
 			return b1.getClient()->coutUnitaireStockage() < b2.getClient()->coutUnitaireStockage();
 		};
 
-		static bool comparatorBatchLength(Batch b1, Batch b2) {
+		static bool comparatorBatchLengthDec(Batch b1, Batch b2) {
 			// cout << "batchptr comparator" << endl;
 			return b1.getProduits().size() > b2.getProduits().size() ;
+		};
+
+		static bool comparatorBatchLengthDecDateDueGlobaleDec(Batch b1, Batch b2) {
+			if (b1.size() == b2.size())
+				return b1.dateDueGlobale() > b2.dateDueGlobale();
+			else return b1.size() > b2.size() ;
+		};
+
+		static bool comparatorCoefSpecial(Batch b1, Batch b2) {
+			float coef1 = b1.size()*b1.dateDueGlobale();
+			float coef2 = b2.size()*b2.dateDueGlobale();
+			return coef1 > coef2;
 		};
 
         static bool comparatorProduitPtrDateDueDec(Produit* p1, Produit* p2) {
