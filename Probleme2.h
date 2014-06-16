@@ -49,7 +49,8 @@ private:
 //    };
     void computeCoutsStockageCourants(vector<Batch>, float);
     void computeCoutsStockageCourantsInit(vector<Batch>);
-
+    void computeCoutMini();
+    float coutMini;
     void heuristique4000(vector<Produit*>);
 
     /* Fonctions pour solution by indo : */

@@ -220,6 +220,7 @@ void Probleme2::solve_bruteforce(){
 
     vector<Batch> res(0);
     build_batches_bruteforce(res);
+    computeCoutMini();
 	vector<Batch> curSol(0);
     float curEval = 0;
     float curTime = 0;
@@ -384,6 +385,12 @@ vector<Produit*> Probleme2::getProdsClient(int num){
 
 void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
 
+
+    // Ajout d'un cut, avec le cout minimal ; à améliorer
+    // Cout minimal = cout des livraisons seules, en supposant qu'on remplit les batchs au max
+    // if (curEval+coutMini > evalBestSol)
+    //     return;
+
     /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
     if(res.size() == 0){
                 if(curEval < evalBestSol){
@@ -401,7 +408,8 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
 	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
-        if(curEval > evalBestSol){
+        if(coutMini+curEval > evalBestSol){
+        // if(curEval > evalBestSol){
             //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
             return;
         }
@@ -969,6 +977,21 @@ void Probleme2::heuristique4000(vector<Produit*> _p) {
 
 
 
+void Probleme2::computeCoutMini() {
+    coutMini = 0;
+    sort(produits.begin(), produits.end(),
+        Tools::comparatorProduitPtrClientDateDue);
 
+    for (int i = 0; i < produits.size(); ++i) {
+        coutMini += produits[i]->getClient()->getDist()*2*eta;
+
+        int j = 0;
+        // while ((i+j) < produits.size() && j < capa && produits[i+j]->getClient()->getNum() == produits[i]->getClient()->getNum()) {
+        //     ++j;
+        // }
+        i += j;
+    }
+    coutMini = coutMini/2;
+}
 
 
