@@ -48,6 +48,9 @@ private:
 //        return b1->coutStockage(dateCourante) > b2->coutStockage(dateCourante);
 //    };
     void computeCoutsStockageCourants(vector<Batch>, float);
+    void computeCoutsStockageCourantsInit(vector<Batch>);
+
+    void heuristique4000(vector<Produit*>);
 
     /* Fonctions pour solution by indo : */
 
