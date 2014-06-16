@@ -233,7 +233,7 @@ void Probleme2::solve_bruteforce(){
 
     computeCoutsStockageCourantsInit(res);
     sort(res.begin(), res.end(),
-        // Tools::comparatorBatchCoutStockageCourantDec); // FOIREUX
+        // Tools::comparatorBatchCoutsStockageCourantsDec); // FOIREUX
         Tools::comparatorBatchLength);
 
     solve_bruteforce(curSol, res,curTime, curEval);
@@ -410,8 +410,10 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
     // Modifs belka : ajout d'un tri sur les batchs restants
     // Est-ce que c'est vraiment là qu'on le mets ?...
-    //computeCoutsStockageCourants(res, curTime);
-    //sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
+    // if (curSol > 0) {
+    //      computeCoutsStockageCourants(res, curTime);
+    //      sort(res.begin(), res.end(), Tools::comparatorBatchCoutStockageCourant);
+    // }
 
     while(it != res.end()){
 		Batch tempBatch = *it;

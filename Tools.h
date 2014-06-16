@@ -82,8 +82,8 @@ class Tools {
              return;   //arrays are passed to functions by address; nothing is returned
         };
 
-		static bool comparatorBatchCoutStockageCourantDec(Batch b1, Batch b2) {
-            return b1.coutStockageCourant()<b2.coutStockageCourant();
+		static bool comparatorBatchCoutsStockageCourantsDec(Batch b1, Batch b2) {
+            return b1.coutStockageCourant()>b2.coutStockageCourant();
         };
 
 
@@ -92,7 +92,7 @@ class Tools {
         // Et par dates dues DEC pour un même client
 		static bool comparatorProduitPtrClientDateDue(Produit* p1, Produit* p2) {
 			if (p1->getClient()->getNum() == p2->getClient()->getNum())
-				return p1->dateDue() < p2->dateDue(); // DECROISSANT
+				return p1->dateDue() > p2->dateDue(); // DECROISSANT
 			else
 				return p1->getClient()->getNum() < p2->getClient()->getNum();
 		};

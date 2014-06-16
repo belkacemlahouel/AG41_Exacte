@@ -13,6 +13,11 @@ int main(int argc, char** argv) {
         // p = new Probleme2();
     }
 
+    // Initialisation du chrono
+    clock_t debut, fin;
+    double duree;
+    debut = clock();
+
     p->printBatchs();
     // p->solve();
     p->solve_indo();
@@ -20,6 +25,11 @@ int main(int argc, char** argv) {
     p->solve_bruteforce();
     // p->printBestSol();
     p->printBestSol_indo_noptr();
+
+    // Arrêt et affichage du chrono
+    fin = clock();
+    duree = (fin - debut) / (double) CLOCKS_PER_SEC;
+    printf("Durée de calcul = %.2lf sec\n", duree);
 
     delete(p);
     cout << "------ Bye World! ------" << endl;
