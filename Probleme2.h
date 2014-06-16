@@ -72,6 +72,8 @@ private:
     bool allProdsInSol(vector<Batch> sol);
     bool sameProducts(Batch batch1,Batch batch2);
     void printBatchs(vector<Batch> blist);
+    void printCombinations(vector<int*> permuts, int r);
+    bool isUseless(int* permutList, int r);
 
 public:
     Probleme2();

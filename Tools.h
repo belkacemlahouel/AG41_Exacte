@@ -52,9 +52,6 @@ class Tools {
             return !comparatorBatchPtrDateDue(b1, b2);
         };
 
-
-
-
         // ATTENTION, ne pas oublier de màj les couts de stockages courants
         // Pour les produits des batchs concernés par le tri
         static bool comparatorBatchPtrCoutStockageCourant(Batch* b1, Batch* b2) {
@@ -62,6 +59,27 @@ class Tools {
         };
         static bool comparatorBatchCoutStockageCourant(Batch b1, Batch b2) {
             return b1.coutStockageCourant()>b2.coutStockageCourant();
+        };
+
+        static void bubbleSort(int *num,int r){
+            int i, j, flag = 1;    // set flag to 1 to start first pass
+            int temp;             // holding variable
+            int numLength = r;
+            for(i = 1; (i <= numLength) && flag; i++)
+            {
+                  flag = 0;
+                  for (j=0; j < (numLength -1); j++)
+                 {
+                       if (num[j+1] < num[j])      // descending order
+                      {
+                            temp = num[j];             // swap elements
+                            num[j] = num[j+1];
+                            num[j+1] = temp;
+                            flag = 1;               // indicates that a swap occurred.
+                       }
+                  }
+             }
+             return;   //arrays are passed to functions by address; nothing is returned
         };
 };
 

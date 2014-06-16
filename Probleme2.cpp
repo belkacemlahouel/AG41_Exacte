@@ -216,7 +216,7 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 
 void Probleme2::solve_bruteforce(){
 
-	solutionHeuristique();
+	//solutionHeuristique();
 
     vector<Batch> res(0);
     build_batches_bruteforce(res);
@@ -251,6 +251,10 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
         //cout<<"Produits du client "<<(i+1)<<" :\n";
         //printProduits(prodsClient);
 
+        /* Petit tri pour être sûrs que les produits sont bien ordonnés */
+        sort(prodsClient.begin(), prodsClient.end(),
+         Tools::comparatorProduitPtrDateDue);
+
         int k;
         int limit;
 
@@ -278,7 +282,14 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                     }
                 }
                 //std::cout << "\n";
-                combinations.push_back(ptr);
+
+                /* On vérifie encore l'ordre dans la permutation, pour ne pas avoir des choses
+                 * comme [0,2,1] qui feraient échouer isUseless */
+                Tools::bubbleSort(ptr,r);
+
+                if(!isUseless(ptr,r)){
+                    combinations.push_back(ptr);
+                }
             } while (std::next_permutation(v.begin(), v.end()));
 
             /* On a toutes les combinaisons sous formes d'indice, maintenant il faut les ajouter aux combinaisons
@@ -297,10 +308,43 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                     cur.push_back(temp);
             }
 
+            //printBatchs(cur);
+
         }
     }
 
     cout<<"Recherche terminee.\n";
+}
+
+/* On peut dire qu'une permutation est inutile si l'écart entre les indices 1 à 1 est != 1
+ * On peut dire par parce qu'on sait qu'un indice de 3 représente un produit qui arrive
+ * plus tard qu'un produit représenté par 1 ou 2. [1,3] est inutile à faire par qu'on sait qu'il
+ * sera AU MOINS pire que [1,2].
+ *
+ * IL FAUDRA SECURISER CETTE FONCTION EN FAISANT DES TRIS REGULIERS POUR SAVOIr SI TOUT EST BIEN EN ORDRE*/
+bool Probleme2::isUseless(int* permut, int r){
+
+    int i;
+    for(i=0;i<r-1;++i){
+        if(permut[i+1]-permut[i] != 1){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void Probleme2::printCombinations(vector<int*> combs,int r){
+
+    int i,j;
+
+    for(j=0;j<combs.size();++j){
+        cout<<"[";
+        for(i=0;i<r;++i){
+            cout<<" "<<combs[j][i]<<" ";
+        }
+        cout<<"]\n";
+    }
 }
 
 /* Supprime ls champs vite d'un vecteur */
@@ -318,6 +362,8 @@ void Probleme2::removeEmptyFields(vector<Produit*> &ptr){
     }
 }
 
+/* Récupère tous les produits du client.
+ * ATTENTION : les batches sont récupérés dans l'ordre croissant */
 vector<Produit*> Probleme2::getProdsClient(int num){
 
     vector<Produit*> prods;
