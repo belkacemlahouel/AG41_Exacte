@@ -111,4 +111,22 @@ float Batch::getDateGlobale(){
     return dateGlobale;
 }
 
+/* Deux batches sont égaux s'ils ont le même nombre de produits, et que ces derniers son similaires, dans le même ordre */
+bool Batch::operator==(Batch b){
+
+    int i;
+
+    if(this->produits.size() != b.getProduits().size()){
+        return false;
+    }
+
+    for(i=0;i<this->produits.size();++i){
+        if(produits[i] != b.getProduits()[i]){
+            return false;
+        } /* On compare les pointeurs directement */
+    }
+
+    return true;
+}
+
 

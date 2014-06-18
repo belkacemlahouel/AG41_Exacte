@@ -10,7 +10,7 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
 	produits = _produits;
 
 	evalSol = 0;
-	evalBestSol = 0;
+	evalBestSol = 9999999999999; /* Valeur volontairement grande pour être sûr de trouver mieux */
 
 	dateCourante = 0.0f;
 
@@ -82,10 +82,6 @@ Probleme2::Probleme2() {
 	evalSol = 0;
 	evalBestSol = 0;
 
-	// initialisation des solutions
-	sol = batchs;
-	bestSol = batchs;
-
 	dateCourante = 0;
 
 	cout << "Initialisation instance de test OK\n";
@@ -95,19 +91,10 @@ Probleme2::Probleme2() {
 Probleme2::~Probleme2() {
 	Tools::viderVector(clients);
 	Tools::viderVector(produits);
-	Tools::viderVector(batchs);
     // Prends directement en compte les delete pour le parser, normalement
 
     delete[] nbBatchsUsed;
     delete[] nbBatchsMini;
-}
-
-// Printings
-void Probleme2::printBatchs() {
-	int i;
-	for(i = 0; i < batchs.size(); ++i) {
-        batchs[i]->printBatch();
-	}
 }
 
 void Probleme2::printBatchs(vector<Batch*> blist) {
@@ -130,7 +117,7 @@ void Probleme2::printBestSol() {
     cout << "______________________________________________________\n";
     cout << "Meilleure solution trouvee :\n\n";
     for (i = 0; i < bestSol.size(); ++i) {
-        cout << "0--->" << bestSol[i]->getClient()->getNum() << "--->";
+        cout << "0--->" << bestSol[i].getClient()->getNum() << "--->";
     }
     cout << "0\n\n";	// A la fin, on revient chez le fournisseur
     cout << "Evaluation de cette solution : " << evalBestSol << "\n";
@@ -147,29 +134,10 @@ void Probleme2::printBestSol_indo() {
     cout << "\nMeilleure solution trouvee :\n\n";
 
     for (i = 0; i < bestSol.size(); ++i) {
-        cout << "0--->" << bestSol[i]->getClient()->getNum() << "--->0\n";
+        cout << "0--->" << bestSol[i].getClient()->getNum() << "--->0\n";
         cout << "Details du batch :\n";
-        bestSol[i]->printBatch();
-        cout<<"\tCout stock. client  : "<<bestSol[i]->coutStockage(bestSol[i]->getDate_livraison());
-        cout <<"\n\n";
-    }
-    cout << "Evaluation de cette solution : " << evalBestSol << "\n";
-    cout << "______________________________________________________\n";
-}
-
-void Probleme2::printBestSol_indo_noptr() {
-    int i;
-
-    setDates_livraison_bestSol_noptr();
-
-    cout << "______________________________________________________\n";
-    cout << "\nMeilleure solution trouvee :\n\n";
-
-    for (i = 0; i < bestSol_noptr.size(); ++i) {
-        cout << "0--->" << bestSol_noptr[i].getClient()->getNum() << "--->0\n";
-        cout << "Details du batch :\n";
-        bestSol_noptr[i].printBatch();
-        cout<<"\tCout stock. client  : "<<bestSol_noptr[i].coutStockage(bestSol_noptr[i].getDate_livraison());
+        bestSol[i].printBatch();
+        cout<<"\tCout stock. client  : "<<bestSol[i].coutStockage(bestSol[i].getDate_livraison());
         cout <<"\n\n";
     }
     cout << "Evaluation de cette solution : " << evalBestSol << "\n";
@@ -188,19 +156,7 @@ void Probleme2::printSol(int niveau) {
     cout << "______________________________________________________\n";
 }
 
-void Probleme2::printSol(vector<Batch*> solution,float evalCurSol) {
-	int i;
-    cout << "______________________________________________________\n";
-    cout << "Solution courante trouvee :\n\t";
-    for (i = 0; i < solution.size(); ++i) {
-        cout << "0--->" << solution[i]->getClient()->getNum() << "--->";
-    }
-    cout << "0\n\n";	// A la fin, on revient chez le fournisseur
-    cout << "Evaluation de cette solution : " << evalCurSol << "\n";
-    cout << "______________________________________________________\n";
-}
-
-void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
+void Probleme2::printSol(vector<Batch> solution,float evalCurSol) {
 	int i;
     cout << "______________________________________________________\n";
     cout << "Solution courante trouvee :\n\t";
@@ -220,7 +176,7 @@ void Probleme2::printSol_noptr(vector<Batch> solution,float evalCurSol) {
 //          PARTIE INDO
 //---------------------------------------
 
-/* Troisième fonction de résolution, cette fois en bruteforce :
+/* Troisième fonction de résolution, cette fois arbre avec élagage :
  * 	- Livrer un produit
  *	- Si ce produit peut aller avec un batch livré plus tard, le faire
  *	- Sinon, le mettre dans un batch à part. */
@@ -250,9 +206,7 @@ void Probleme2::solve_bruteforce(){
         // Tools::comparatorBatchLengthDecDateDueGlobaleDec);   // Tri 3
         Tools::comparatorCoefSpecial);
 
-
     solve_bruteforce(curSol, res,curTime, curEval);
-
 
     for (int i = 0; i < clients.size(); ++i) {
         cout << "Nombre de batchs mini pour le client " << clients[i]->getNum();
@@ -338,8 +292,8 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
     cout<<"Recherche terminee.\n";
 }
 
-/* On peut dire qu'une permutation est inutile si l'écart entre les indices 1 à 1 est != 1
- * On peut dire par parce qu'on sait qu'un indice de 3 représente un produit qui arrive
+/* On peut dire qu'une permutation est inutile si l'écart entre les indices un à un est != 1
+ * On peut le dire parce qu'on sait qu'un indice de 3 représente un produit qui arrive
  * plus tard qu'un produit représenté par 1 ou 2. [1,3] est inutile à faire par qu'on sait qu'il
  * sera AU MOINS pire que [1,2].
  *
@@ -348,11 +302,10 @@ bool Probleme2::isUseless(int* permut, int r){
 
     int i;
     for(i=0;i<r-1;++i){
-        if(permut[i+1]-permut[i] > 1){ // What if the products for one client are not in order.. Meaning that we could have P1C1 P2C2 P3C1 and this condition is validated but for this client C1, P1 and P3 follow each other!
+        if(permut[i+1]-permut[i] > 1){
             return true;
         }
     }
-
     return false;
 }
 
@@ -366,21 +319,6 @@ void Probleme2::printCombinations(vector<int*> combs,int r){
             cout<<" "<<combs[j][i]<<" ";
         }
         cout<<"]\n";
-    }
-}
-
-/* Supprime ls champs vite d'un vecteur */
-void Probleme2::removeEmptyFields(vector<Produit*> &ptr){
-
-    vector<Produit*>::iterator it = ptr.begin();
-
-    while(it != ptr.end()){
-
-        if(*it == NULL){
-            it = ptr.erase(it);
-        } else {
-            ++it;
-        }
     }
 }
 
@@ -412,12 +350,12 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
                 if(curEval < evalBestSol){
                     cout<<"Meilleure solution trouvee. On l'enregistre.\n";
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
-                    bestSol_noptr = curSol;
+                    bestSol = curSol;
                     evalBestSol = curEval;
 
                     // A corriger, sinon segfault...
-                    //if (bestSol_noptr.size() > 0)
-                        printBestSol_indo_noptr();
+                    //if (bestSol.size() > 0)
+                        printBestSol_indo();
 
                 } else {
                     //cout<<"Pire solution, on oublie.\n";
@@ -454,7 +392,7 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
         newSol.push_back(tempBatch);
         vector<Batch> newRest = res;
-        removeBatch(newRest, tempBatch);
+        removeBatchAndDoubles(newRest, tempBatch);
 
         float newTime = curTime;
         float newEval = curEval;
@@ -473,7 +411,7 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
         } else {
             int indice = newSol.size() - 1;
             newTime -= newSol[indice].getClient()->getDist();
-            if(newTime > newSol[indice].getDateGlobale()){
+            if(newTime > newSol[indice].getDateGlobale()){ // attente à l'entrepôt
                 newTime = newSol[indice].getDateGlobale();
             }
             if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
@@ -497,19 +435,17 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
 void Probleme2::solve_indo(){
 
-    solutionHeuristique();
-
-    vector<Batch*> batches(0);
+    vector<Batch> batches(0);
     vector<Produit*> res = produits;
     build_batches(batches,res);
 
-    vector<Batch*> cursol(0);
+    vector<Batch> cursol(0);
     float curCost = 0;
     solve_indo(cursol, batches, curCost);
 
 }
 
-void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
+void Probleme2::build_batches(vector<Batch> &cur, vector<Produit*> res){
 
     if(res.size() == 0){
         return;
@@ -519,8 +455,7 @@ void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
     Produit* firstProd = produitDueMax(res);
 
     /* Le nouveau batch est construit */
-    Batch* tmp = new Batch(firstProd);
-    cur.push_back(tmp);
+    Batch tmp = Batch(firstProd);
 
     /* Le nouveau produit ajouté au batch, on peut donc le supprimer de la liste */
     removeProduct(res,firstProd);
@@ -528,11 +463,11 @@ void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
     /* On construit le batch à partir du premier produit dedans */
     int i = 0;
 
-    while(tmp->getProduits().size() < capa && i<res.size()){
-        if(res[i]->getClient()->getNum() == tmp->getProduits()[0]->getClient()->getNum()){
+    while(tmp.getProduits().size() < capa && i<res.size()){
+        if(res[i]->getClient()->getNum() == tmp.getClient()->getNum()){
             /* Condition pour être ajouté au batch : Doit avec une date due <= le premier produit du batch - l'aller-retour */
-            if(res[i]->dateDue() >= (tmp->getProduits()[0]->dateDue() - tmp->getProduits()[0]->getClient()->getDist()*2)){
-                tmp->addProduit(res[i]);
+            if(res[i]->dateDue() >= (tmp.getProduits()[0]->dateDue() - tmp.getProduits()[0]->getClient()->getDist()*2)){
+                tmp.addProduit(res[i]);
                 removeProduct(res,res[i]);
             } else {
                 ++i; // On n'incrémente que si aucun produit n'a été supprimé
@@ -542,13 +477,15 @@ void Probleme2::build_batches(vector<Batch*> &cur, vector<Produit*> res){
         }
     }
 
-    tmp->printBatch();
+    cur.push_back(tmp);
+
+    tmp.printBatch();
 
     /* On continue à créer les batches et à les placer dans la timeline récursivement */
     build_batches(cur, res);
 }
 
-void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,float curEval){
+void Probleme2::solve_indo(vector<Batch> curSol, vector<Batch> resBatches,float curEval){
 
     if(resBatches.size() == 0){
         curEval = evaluerSolution_auto(curSol);
@@ -576,28 +513,34 @@ void Probleme2::solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,floa
     }
 
     /* Test de toutes les combinaisons de livraison récursivement*/
-    vector<Batch*>::iterator it = resBatches.begin();
+    vector<Batch>::iterator it = resBatches.begin();
 
     while(it != resBatches.end()){
-        Batch* temp = *it;
+        Batch temp = *it;
 
-        vector<Batch*> newSol = curSol;
-
-        printBatchs(newSol);
+        vector<Batch> newSol = curSol;
 
         newSol.push_back(temp);
-        vector<Batch*> newRest = resBatches;
+        vector<Batch> newRest = resBatches;
+
+        cout<<"Avant remove :\n";
+        printBatchs(newRest);
 
         removeBatch(newRest,temp);
+
+
+        cout<<"\nApres remove :\n";
+        printBatchs(newRest);
+
         solve_indo(newSol,newRest,curEval);
         ++it;
     }
 }
 
 /* Supprime un batch d'une liste de batches */
-void Probleme2::removeBatch(vector<Batch*> &newRest,Batch* temp){
+void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
 
-    vector<Batch*>::iterator it;
+    vector<Batch>::iterator it;
 
     for(it=newRest.begin();it!=newRest.end();++it){
         if(*it == temp){
@@ -612,13 +555,13 @@ void Probleme2::removeBatch(vector<Batch*> &newRest,Batch* temp){
     ainsi que tous les batches précédent
     et tous les batches qui contiennent les mêmes
     produits que dans le Batch temp (gros gros élagage)*/
-void Probleme2::removeBatch(vector<Batch> &newRest,Batch temp){
+void Probleme2::removeBatchAndDoubles(vector<Batch> &newRest,Batch temp){
 
     vector<Batch>::iterator it;
 
     /* Première étape : on supprime temp */
     for(it=newRest.begin();it!=newRest.end();++it){
-        if(&(*it) == &temp){
+        if(*it == temp){
             newRest.erase(it);
             break;
         }
@@ -681,7 +624,7 @@ Produit* Probleme2::produitDueMax(vector<Produit* > plist){
 /* Contrairement à evaluerSolution, cette fonction va évaluer la solution donnée en reconstruisant
    lui même la timeline de livraison à partir d'une liste de batch. Elle n'a donc pas besoin de dateCourante
    /!\ CONTRAIREMENT A EVALUERSOLUTION, CETTE EVALUATION SE FAIT EN BACKTRACK /!\ */
-float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
+float Probleme2::evaluerSolution_auto(vector<Batch> s) {
 
     float curTime = 0;
     cout << "Evaluation solution"<<endl;
@@ -689,48 +632,28 @@ float Probleme2::evaluerSolution_auto(vector<Batch*> s) {
 
     float ev = 0;
     /* La date de départ est la date de livraison du dernier batch + le temps de retour a l'entrepôt */
-    curTime = s[0]->dateDueGlobale() + s[0]->getClient()->getDist();
+    curTime = s[0].dateDueGlobale() + s[0].getClient()->getDist();
     for (int i = 0; i < s.size(); ++i) {
 
-        ev += s[i]->getClient()->getDist() *2*eta; /* On fait payer l'aler-retour */
+        ev += s[i].getClient()->getDist() *2*eta; /* On fait payer l'aler-retour */
 
-        curTime -= s[i]->getClient()->getDist();
+        curTime -= s[i].getClient()->getDist();
 
         /* Si la date de livraison est trop tôt pour le client, il faut attendre à l'entrepôt pour ne pas l'amener trop tôt */
-        if(curTime > s[i]->dateDueGlobale()){
-            curTime = s[i]->dateDueGlobale();
+        if(curTime > s[i].dateDueGlobale()){
+            curTime = s[i].dateDueGlobale();
         }
 
-        float tempCoutStock = s[i]->coutStockage(curTime);
-        s[i]->setDate_livraison(curTime);
+        float tempCoutStock = s[i].coutStockage(curTime);
+        s[i].setDate_livraison(curTime);
         ev += tempCoutStock;
-        curTime -= s[i]->getClient()->getDist();
+        curTime -= s[i].getClient()->getDist();
     }
     return ev;
 }
 
-/* Pour la meilleure solution, renseigne les dates d'arrivées des meilleurs batches,
- * bestSol est à l'endroit on doit donc la reverse pour bracktrack ici.*/
 void Probleme2::setDates_livraison_bestSol(){
-    vector<Batch*> tempBestSol = bestSol;
-    reverse(tempBestSol.begin(),tempBestSol.end());
-    float curTime = tempBestSol[0]->dateDueGlobale() + tempBestSol[0]->getClient()->getDist(); // départ du temps à l'entrepot, à la fin
-    for (int i = 0; i < tempBestSol.size(); ++i) {
-
-        curTime -= tempBestSol[i]->getClient()->getDist();
-
-        if(curTime > tempBestSol[i]->dateDueGlobale()){
-            curTime = tempBestSol[i]->dateDueGlobale();
-        }
-
-        tempBestSol[i]->setDate_livraison(curTime);
-
-        curTime -= tempBestSol[i]->getClient()->getDist();
-    }
-}
-
-void Probleme2::setDates_livraison_bestSol_noptr(){
-    vector<Batch> &tempBestSol = bestSol_noptr;
+    vector<Batch> &tempBestSol = bestSol;
     reverse(tempBestSol.begin(),tempBestSol.end());
 
     float curTime = tempBestSol[0].dateDueGlobale() + tempBestSol[0].getClient()->getDist(); // départ du temps à l'entrepot, à la fin
@@ -749,258 +672,6 @@ void Probleme2::setDates_livraison_bestSol_noptr(){
 
     reverse(tempBestSol.begin(),tempBestSol.end());
 }
-
-
-
-
-
-
-
-//---------------------------------------
-//          PARTIE BELKA
-//---------------------------------------
-
-
-void Probleme2::solve() {
-    // On trie les produits par ordre décroissant des dates dues
-    sort(produits.begin(), produits.end(),
-         Tools::comparatorProduitPtrDateDueDec);
-
-    // Heuristique
-    solutionHeuristique();
-
-    // On appelle la résolution récursive
-    vector<Batch*> cur(0);
-    vector<Produit*> res = produits;
-    solve(cur, res);
-
-    // -------
-    // heuristique4000(produits);
-    // -------
-
-//    for (int i = 0; i < bestSol.size(); ++i) {
-//        bestSol[i]->printBatch();
-//    }
-
-//    sort(bestSol.begin(), bestSol.end(),
-//         Tools::comparatorBatchPtrCoutStockageCourant);
-}
-
-// bestSol -> vector(#produits) et on utilise (int) iter ?
-// Solution itérative... pour le moment !
-void Probleme2::solve(vector<Batch*> cur, vector<Produit*> res) {
-    bool f = true; // Pour voir comment on initialise la date courante
-
-    while (res.size() > 0) {
-        Batch* tmp = new Batch(res[0]);
-        res.erase(res.begin());
-
-        bool b = true;
-        // b : est-ce qu'on doit continuer à chercher
-        //      si d'autres éléments doivent être ajoutés au batch
-        //      pour le même client, en supposant un tri DEC sur les dates dues
-
-        for (int i = 0; b && i < res.size(); ++i) {
-            if (tmp->getClient()->getNum() == res[i]->getClient()->getNum()) {
-                cout << "Même client" << endl;
-                if (dateCourante - res[i]->dateDue() >                /// la première fois qu'on passe ici, dateCourante = 0 ?
-                                    res[i]->getClient()->getDist()) { /// getDist*2 ?
-                    // On ne doit pas l'ajouter, mais on ferait bien
-                    // de vérifier si on peut, amélioration...
-                    // Stocker revient moins cher qu'un AR ?
-                    cout << "VRAI1";
-                    if (livraisonImmediate(res[i])) {
-                        cout << "VRAI";
-                        tmp->addProduit(res[i]);
-                        res.erase(res.begin()+i);
-                    } else {
-                        b = false;
-                    }
-                    cout << endl;
-                } else {
-                    // avant de l'ajouter, vérifier si cela vaut le coût...
-                    tmp->addProduit(res[i]);
-                    res.erase(res.begin()+i);
-                }
-            } else cout << "Pas même client" << endl;
-        }
-
-        if (f) {
-            dateCourante = tmp->dateDueGlobale()-tmp->getClient()->getDist();
-            f = false;
-        } else {
-            dateCourante = min(dateCourante-tmp->getClient()->getDist()*2,
-                           tmp->dateDueGlobale()-tmp->getClient()->getDist()*2);
-        }
-
-        cout << "Date courante : " << dateCourante << endl;
-        tmp->printBatch();
-        cur.push_back(tmp);
-    }
-
-    // On renverse l'ordre des batchs
-    // (ils sont du dernier à livrer au premier là)
-    reverse(cur.begin(), cur.end());
-
-    evalBestSol = evaluerSolution(cur);
-    bestSol = cur;
-}
-
-// ----------------------------------------------------------
-
-// On suppose une heuristique vraiment nulle... Vision pessimiste
-void Probleme2::solutionHeuristique() {
-    evalBestSol = 999999999;
-}
-
-bool Probleme2::encorePossible(vector<Batch*> reste) {
-	for (int i = 0; i < reste.size(); ++i) {
-		if (reste[i]->dateDueGlobale() < // dateCourante) {
-            dateCourante + reste[i]->getClient()->getDist()) {
-			return false;
-		}
-	}
-	return true;
-}
-
-// Livraison et annulation de livraison (incluent chgts temporels)
-// Avec cette méthode, nous avancons dans le temps
-float Probleme2::livraison(Batch* b) {
-    /* rep est le coût de livraison + stockage du batch */
-	float rep = b->getClient()->getDist() * 2*eta;
-    // cout << "Cout de livraison client " << b->getClient()->getNum();
-    // cout << " : " << rep << endl;
-
-	dateCourante += b->getClient()->getDist();
-	rep += b->coutStockage(dateCourante);
-
-	cout<<"Batch pour client "<<b->getProduits()[0]->getClient()->getNum()<<", Date : "<<dateCourante<<"/"<<b->dateDueGlobale()<<endl;
-
-	dateCourante += b->getClient()->getDist();
-	return rep;
-}
-
-// Tandis qu'avec cette méthode, on recule
-float Probleme2::annulerLivraison(Batch* b) {
-	float rep = b->getClient()->getDist() * 2*eta;
-	dateCourante -= b->getClient()->getDist();
-	rep += b->coutStockage(dateCourante);
-	dateCourante -= b->getClient()->getDist();
-	return rep;
-}
-
-// On suppose qu'on commence à la bonne date, et les batchs sont corrects
-float Probleme2::evaluerSolution(vector<Batch*> s) {
-    cout << "Evaluation solution, dateCourante = " << dateCourante << endl;
-    cout << "Detail de la solution :\n";
-    float ev = 0;
-    for (int i = 0; i < s.size(); ++i) {
-        ev += livraison(s[i]);
-    }
-    return ev;
-}
-
-// True si on devrait livrer ce produit tout de suite
-// False sinon, et on devrait plutôt livrer au moins après un AR
-// On suppose que le produit peut attendre un AR
-// ATTENTION, ON NE TIENT PAS COMPTE DE L'AVANCE QU'ON DEVRA PRENDRE
-//      SUR LES AUTRES PRODUITS A CAUSE DE CELUI LA... REVOIR
-bool Probleme2::livraisonImmediate(Produit* p) {
-    // On calcule le coût de la livraison tout de suite, pour ce produit
-    // Cela inclut aussi les stockages
-    float maintenant = 0;
-
-    dateCourante += p->getClient()->getDist();      // Aller
-
-    maintenant = p->coutStockage(dateCourante);     // On livre
-
-    dateCourante += p->getClient()->getDist()*2;    // Retour puis re-aller
-
-    // Alternative, on livre dans un AR
-    // Du coup, on fait un AR rien que pour ce produit
-    float apres = 0;
-
-    apres = p->coutStockage(dateCourante);          // On livre
-    apres += eta*p->getClient()->getDist()*2;       // AR en plus
-
-    dateCourante -= p->getClient()->getDist()*3;
-
-    // Et malgré tout, on préfère livrer immédiatement, si c'est le même coût
-    return (maintenant > apres);
-}
-
-void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {
-    for (int i = 0; i < reste.size(); ++i) {
-        reste[i].computeCoutStockageCourant(date);
-    }
-}
-void Probleme2::computeCoutsStockageCourantsInit(vector<Batch> reste) {
-    for (int i = 0; i < reste.size(); ++i) {
-        reste[i].computeCoutStockageCourant(reste[i].getDateGlobale());
-    }
-}
-
-
-
-
-
-
-
-
-
-// Encore une heuristique
-// Tant qu'il reste des produits à livrer
-//      On les trie par ordre de clients ASC
-//      On trie par date due (on suppose le tri stable...) DEC
-//      On regarde pour chaque client, le produit le plus tardif -> batch
-//          On regarde les autres, voir si ils doivent être ajoutés ou pas
-//              Selon juste un critère : si on a le temps de faire l'AR ou pas
-//          
-//      On regarde classe les batchs obtenus par couts de stockage DEC
-// On commence par le dernier, jusqu'au premier
-//      On livre le dernier à min(dc-AR, dd - A) et on calcule eval
-
-// -----
-// cs(produit k) = tho(client i)*eta + (dd-dc-tho(client i))*beta(client i)
-// après livraison chez client i : dc <- min(dc-2*tho(client i), dd-tho(client i))
-// initialisation de la dc <- 999999 (inf)
-//                 puis dc <- [formule] mais on prends la supposée dd(batch sélectionné)
-// -----
-void Probleme2::heuristique4000(vector<Produit*> _p) {
-    // vector<Produit*> p;
-    // p.assign(_p.begin(), _p.end());
-
-    // sort(p.begin(), p.end(), Tools::comparatorProduitPtrClientDateDue);
-
-    // // for (int i = 0; i < p.size(); ++i) {
-    // //     p[i]->printProduit();
-    // // }
-
-    // vector<Batch*> b;
-
-    // // on fait les batchs de manière bidon (à améliorer)
-    // // on ajoute à chaque fois qu'on est obligés à cause d'un AR trop grand
-    // for (int i = 0; i < p.size(); ++i) {
-    //     Batch* tmp = new Batch(p[i]);
-    //     while (i+1 < p.size() && tmp->getClient()->getNum() == p[i+1]->getClient()->getNum()
-    //             && tmp->getDateGlobale() < { // tant que la date est inférieure à AR/2 ? = A
-    //         if () { // inférieur à AR on ajoute
-    //             tmp.addProduit(p[i+1]);
-    //         }
-    //         ++i;
-    //     }
-    //     b.push_back(tmp);
-    // }
-
-    // // DU COUP on a tous les batchs c'est cool ma poule, heuristique sisi
-
-    // // et on peut alors parler du tri des batchs sur les couts de stockages en fonction de la date due
-
-    // // on affiche la solution trouvée + évaluation
-}
-
-
-
 
 void Probleme2::computeCoutMini() {
     coutMini = 0;
@@ -1026,4 +697,13 @@ void Probleme2::computeCoutMini() {
     // coutMini = coutMini/3;
 }
 
-
+void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {
+    for (int i = 0; i < reste.size(); ++i) {
+        reste[i].computeCoutStockageCourant(date);
+    }
+}
+void Probleme2::computeCoutsStockageCourantsInit(vector<Batch> reste) {
+    for (int i = 0; i < reste.size(); ++i) {
+        reste[i].computeCoutStockageCourant(reste[i].getDateGlobale());
+    }
+}

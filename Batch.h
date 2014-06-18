@@ -21,6 +21,7 @@ class Batch{
 		Batch();
 		~Batch(){}
 		void printBatch();
+		bool operator==(const Batch b);
 
 		void addProduit(Produit*);
 		float dateDueGlobale();

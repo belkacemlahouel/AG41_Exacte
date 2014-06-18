@@ -18,13 +18,9 @@ int main(int argc, char** argv) {
     double duree;
     debut = clock();
 
-    p->printBatchs();
-    // p->solve();
     p->solve_indo();
     p->printBestSol_indo();
     p->solve_bruteforce();
-    // p->printBestSol();
-    p->printBestSol_indo_noptr();
 
     // Arrêt et affichage du chrono
     fin = clock();

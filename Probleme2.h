@@ -2,6 +2,7 @@
 #define __PROBLEME_2__
 
 #include "Parser.h"
+#include <ctime>
 #include <algorithm>
 
 using namespace std;
@@ -14,11 +15,7 @@ private:
     vector<Client*> clients;		// Liste des clients
     vector<Produit*> produits;		// Liste des produits
 
-    // --- Recherche de la meilleure solution
-    vector<Batch*> batchs;
-
-    vector<Batch*> bestSol;			// Meilleure solution (l'ordre des batches est le bon
-    vector<Batch> bestSol_noptr;			// Meilleure solution (l'ordre des batches est le bon
+    vector<Batch> bestSol;			// Meilleure solution (l'ordre des batches est le bon
 
     float evalBestSol;				// + Evaluation
     vector<Batch*> sol;				// Solution en cours
@@ -26,27 +23,7 @@ private:
 
     float dateCourante;				// Date courante lors du calcul
 
-    // --- Méthodes privées, résolution principalement
-    // void solve(int iter, vector<Batch*> reste);
-    void solutionHeuristique();
     void init(int capa, float eta, vector<Client*>, vector<Produit*>);
-    bool encorePossible(vector<Batch*> reste);
-    float livraison(Batch*);		// Renvoient le coût de cette livraison
-    float annulerLivraison(Batch*); // et avancent (ou reculent) la date
-    // void buildBatchs();
-    void solve(vector<Batch*> cur, vector<Produit*> reste);
-    float evaluerSolution(vector<Batch*>);
-    bool livraisonImmediate(Produit*);
-
-//    // Fonction de comparaison pour les batchs
-//    bool comparatorBatchCoutStockageDate(Batch b1, Batch b2) {
-//        return b1.coutStockage(dateCourante) > b2.coutStockage(dateCourante);
-//    };
-//
-//    // Fonction de comparaison pour les batchs
-//    bool comparatorBatchPtrCoutStockageDate(Batch* b1, Batch* b2) {
-//        return b1->coutStockage(dateCourante) > b2->coutStockage(dateCourante);
-//    };
     void computeCoutsStockageCourants(vector<Batch>, float);
     void computeCoutsStockageCourantsInit(vector<Batch>);
     void computeCoutMini();
@@ -60,17 +37,16 @@ private:
 
     void printBatchs(vector<Batch*> blist);
     void printProduits(vector<Produit*> plist);
-    void printSol(vector<Batch*> solution,float evalCurSol);
+    void printSol(vector<Batch> solution,float evalCurSol);
     void printSol_noptr(vector<Batch> solution,float evalCurSol);
     void setDates_livraison_bestSol();
-    void setDates_livraison_bestSol_noptr();
-    void build_batches(vector<Batch*> &cur, vector<Produit*> res);
-    void solve_indo(vector<Batch*> curSol, vector<Batch*> resBatches,float curEval);
+    void build_batches(vector<Batch> &cur, vector<Produit*> res);
+    void solve_indo(vector<Batch> curSol, vector<Batch> resBatches,float curEval);
     Produit* produitDueMax(vector<Produit* > plist);
-    float evaluerSolution_auto(vector<Batch*>);
+    float evaluerSolution_auto(vector<Batch>);
     void removeProduct(vector<Produit*> &plist, Produit* p);
-    void removeBatch(vector<Batch*> &newRest,Batch* temp);
     void removeBatch(vector<Batch> &newRest,Batch temp);
+    void removeBatchAndDoubles(vector<Batch> &newRest,Batch temp);
     void build_batches_bruteforce(vector<Batch> &cur);
     vector<Produit*> getProdsClient(int num);
     void removeEmptyFields(vector<Produit*> &ptr);
