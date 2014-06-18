@@ -164,17 +164,6 @@ bool Probleme2::livraisonImmediate(Produit* p) {
     return (maintenant > apres);
 }
 
-void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {
-    for (int i = 0; i < reste.size(); ++i) {
-        reste[i].computeCoutStockageCourant(date);
-    }
-}
-void Probleme2::computeCoutsStockageCourantsInit(vector<Batch> reste) {
-    for (int i = 0; i < reste.size(); ++i) {
-        reste[i].computeCoutStockageCourant(reste[i].getDateGlobale());
-    }
-}
-
 
 
 

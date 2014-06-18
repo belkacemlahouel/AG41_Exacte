@@ -18,10 +18,6 @@ private:
     vector<Batch> bestSol;			// Meilleure solution (l'ordre des batches est le bon
 
     float evalBestSol;				// + Evaluation
-    vector<Batch*> sol;				// Solution en cours
-    float evalSol;					// + Evaluation
-
-    float dateCourante;				// Date courante lors du calcul
 
     void init(int capa, float eta, vector<Client*>, vector<Produit*>);
     void computeCoutsStockageCourants(vector<Batch>, float);
@@ -41,7 +37,7 @@ private:
     void printSol_noptr(vector<Batch> solution,float evalCurSol);
     void setDates_livraison_bestSol();
     void build_batches(vector<Batch> &cur, vector<Produit*> res);
-    void solve_indo(vector<Batch> curSol, vector<Batch> resBatches,float curEval);
+    void heuristique(vector<Batch> curSol, vector<Batch> resBatches,float curEval);
     Produit* produitDueMax(vector<Produit* > plist);
     float evaluerSolution_auto(vector<Batch>);
     void removeProduct(vector<Produit*> &plist, Produit* p);
@@ -50,7 +46,7 @@ private:
     void build_batches_bruteforce(vector<Batch> &cur);
     vector<Produit*> getProdsClient(int num);
     void removeEmptyFields(vector<Produit*> &ptr);
-    void solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval);
+    void solve(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval);
     bool alreadyInSol(Batch batch,vector<Batch> sol);
     bool allProdsInSol(vector<Batch> sol);
     bool sameProducts(Batch batch1,Batch batch2);
@@ -67,13 +63,9 @@ public:
     void printProduits();
 
     void printBestSol();
-    void printBestSol_indo();
-    void printBestSol_indo_noptr();
-    void printSol(int niveau);
 
+    void heuristique();
     void solve();
-    void solve_indo();
-    void solve_bruteforce();
 };
 
 #endif // __PROBLEME__

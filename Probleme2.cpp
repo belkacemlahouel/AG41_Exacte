@@ -9,10 +9,7 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
 
 	produits = _produits;
 
-	evalSol = 0;
 	evalBestSol = 9999999999999; /* Valeur volontairement grande pour être sûr de trouver mieux */
-
-	dateCourante = 0.0f;
 
     nbBatchsMini = new int[clients.size()];
     nbBatchsUsed = new int[clients.size()];
@@ -79,10 +76,7 @@ Probleme2::Probleme2() {
 	// buildBatchs();
 
 	// initialisation des évaluations
-	evalSol = 0;
-	evalBestSol = 0;
-
-	dateCourante = 0;
+	evalBestSol = 999999999999;
 
 	cout << "Initialisation instance de test OK\n";
 }
@@ -111,21 +105,8 @@ void Probleme2::printBatchs(vector<Batch> blist) {
 	}
 }
 
-void Probleme2::printBestSol() {
-    int i;
-
-    cout << "______________________________________________________\n";
-    cout << "Meilleure solution trouvee :\n\n";
-    for (i = 0; i < bestSol.size(); ++i) {
-        cout << "0--->" << bestSol[i].getClient()->getNum() << "--->";
-    }
-    cout << "0\n\n";	// A la fin, on revient chez le fournisseur
-    cout << "Evaluation de cette solution : " << evalBestSol << "\n";
-    cout << "______________________________________________________\n";
-}
-
 /* écriture de la meilleure solution, de façon plus détaillée */
-void Probleme2::printBestSol_indo() {
+void Probleme2::printBestSol() {
     int i;
 
     setDates_livraison_bestSol();
@@ -141,18 +122,6 @@ void Probleme2::printBestSol_indo() {
         cout <<"\n\n";
     }
     cout << "Evaluation de cette solution : " << evalBestSol << "\n";
-    cout << "______________________________________________________\n";
-}
-
-void Probleme2::printSol(int niveau) {
-	int i;
-    cout << "______________________________________________________\n";
-    cout << "Solution courante trouvee :\n\t";
-    for (i = 0; i <= niveau; ++i) {
-        cout << "0--->" << sol[i]->getClient()->getNum() << "--->";
-    }
-    cout << "0\n\n";	// A la fin, on revient chez le fournisseur
-    cout << "Evaluation de cette solution : " << evalSol << "\n";
     cout << "______________________________________________________\n";
 }
 
@@ -181,7 +150,7 @@ void Probleme2::printSol(vector<Batch> solution,float evalCurSol) {
  *	- Si ce produit peut aller avec un batch livré plus tard, le faire
  *	- Sinon, le mettre dans un batch à part. */
 
-void Probleme2::solve_bruteforce(){
+void Probleme2::solve(){
 
 	//solutionHeuristique();
 
@@ -206,7 +175,7 @@ void Probleme2::solve_bruteforce(){
         // Tools::comparatorBatchLengthDecDateDueGlobaleDec);   // Tri 3
         Tools::comparatorCoefSpecial);
 
-    solve_bruteforce(curSol, res,curTime, curEval);
+    solve(curSol, res,curTime, curEval);
 
     for (int i = 0; i < clients.size(); ++i) {
         cout << "Nombre de batchs mini pour le client " << clients[i]->getNum();
@@ -337,7 +306,7 @@ vector<Produit*> Probleme2::getProdsClient(int num){
     return prods;
 }
 
-void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
+void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
 
 
     // Ajout d'un cut, avec le cout minimal ; à améliorer
@@ -355,7 +324,7 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
                     // A corriger, sinon segfault...
                     //if (bestSol.size() > 0)
-                        printBestSol_indo();
+                        printBestSol();
 
                 } else {
                     //cout<<"Pire solution, on oublie.\n";
@@ -403,37 +372,38 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
 
         /* Calcul du temps et des coûts */
         if(newSol.size() == 1){
-            newTime = newSol[0].getDateGlobale(); // FAUX ? min(dateDue-retour, dateGlobale-aller/retour) ?... Je sais pas en fait... Ca corresponds à quoi ?
+            newTime = newSol[0].getDateGlobale();
             newEval = newSol[0].coutStockage(newTime);
-            if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
-                newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
             int indice = newSol.size() - 1;
             newTime -= newSol[indice].getClient()->getDist();
+
             if(newTime > newSol[indice].getDateGlobale()){ // attente à l'entrepôt
                 newTime = newSol[indice].getDateGlobale();
             }
-            if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
+
+            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
                 newEval += newSol[indice].getClient()->getDist()*2*eta;
+
             newEval += newSol[indice].coutStockage(newTime);
             newTime -= newSol[indice].getClient()->getDist();
         }
 
-        solve_bruteforce(newSol,newRest,newTime,newEval);
+        solve(newSol,newRest,newTime,newEval);
+
+        --nbBatchsUsed[num-1];
 
         it++;
     }
 }
 
-/* test d'une nouvelle solution de résolution. Algo :
+/* Solution heuristique. Algo :
  * - créer les batch comme d'habitude. Si un batch se voit livré plus tôt que sa date due, reprendre les batchs aux alentours
  *          (avant ou après ??)
- * - et voir s'il est possible de le scinder (envoyer un bout avant  pour que le nouveau batch soit plus optimal
- *
- *          PREMIEIERE VERSION : LES BATCHES NE SE SCINDENT JAMAIS              */
+ * - et voir s'il est possible de le scinder (envoyer un bout avant  pour que le nouveau batch soit plus optimal*/
 
-void Probleme2::solve_indo(){
+void Probleme2::heuristique(){
 
     vector<Batch> batches(0);
     vector<Produit*> res = produits;
@@ -441,7 +411,7 @@ void Probleme2::solve_indo(){
 
     vector<Batch> cursol(0);
     float curCost = 0;
-    solve_indo(cursol, batches, curCost);
+    heuristique(cursol, batches, curCost);
 
 }
 
@@ -485,7 +455,7 @@ void Probleme2::build_batches(vector<Batch> &cur, vector<Produit*> res){
     build_batches(cur, res);
 }
 
-void Probleme2::solve_indo(vector<Batch> curSol, vector<Batch> resBatches,float curEval){
+void Probleme2::heuristique(vector<Batch> curSol, vector<Batch> resBatches,float curEval){
 
     if(resBatches.size() == 0){
         curEval = evaluerSolution_auto(curSol);
@@ -532,7 +502,7 @@ void Probleme2::solve_indo(vector<Batch> curSol, vector<Batch> resBatches,float 
         cout<<"\nApres remove :\n";
         printBatchs(newRest);
 
-        solve_indo(newSol,newRest,curEval);
+        heuristique(newSol,newRest,curEval);
         ++it;
     }
 }
