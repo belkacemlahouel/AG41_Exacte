@@ -304,27 +304,29 @@ vector<Produit*> Probleme2::getProdsClient(int num){
 void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
 
 
+    /* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
+    if(curSol.size() > 0){
+        if(coutMini+curEval > evalBestSol){
+        // if(curEval > evalBestSol){
+            //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
+            return;
+        }
+    }
+
     /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
     if(res.size() == 0){
                 if(curEval < evalBestSol){
                     cout<<"Meilleure solution trouvee. On l'enregistre.\n";
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
+
                     bestSol = curSol;
-                    evalBestSol = curEval;
+                    evalBestSol = curEval+coutMini;
                     printBestSol();
 
                 } else {
                     //cout<<"Pire solution, on oublie.\n";
                 }
             return;
-    }
-
-	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
-    if(curSol.size() > 0){
-        if(curEval > evalBestSol){
-            //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
-            return;
-        }
     }
 
 	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
@@ -354,11 +356,16 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
         float newTime = curTime;
         float newEval = curEval;
 
+        // Comptage des batchs déjà livrés, jusque là
+        int num = newSol[newSol.size()-1].getClient()->getNum();
+        ++nbBatchsUsed[num-1];
+
         /* Calcul du temps et des coûts */
         if(newSol.size() == 1){
             newTime = newSol[0].dateDueGlobale();
             newEval = newSol[0].coutStockage(newTime);
-            newEval += newSol[0].getClient()->getDist()*2*eta;
+            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
+                newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
             int indice = newSol.size() - 1;
@@ -366,12 +373,17 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
             if(newTime > newSol[indice].dateDueGlobale()){
                 newTime = newSol[indice].dateDueGlobale();
             }
-            newEval += newSol[indice].getClient()->getDist()*2*eta;
+
+            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
+                newEval += newSol[indice].getClient()->getDist()*2*eta;
+
             newEval += newSol[indice].coutStockage(newTime);
             newTime -= newSol[indice].getClient()->getDist();
         }
 
         solve(newSol,newRest,newTime,newEval);
+
+        --nbBatchsUsed[num-1]; // Sûr de ça ?
 
         it++;
     }

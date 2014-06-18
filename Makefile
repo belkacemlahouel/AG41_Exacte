@@ -2,7 +2,7 @@
 
 GXX = g++
 
-CCFLAGS = -g 
+CCFLAGS = -O3
 # CCFLAGS = -Wall -Werror -ansi -pedantic -fPIC -Wextra -g -O3
 
 TARGET 		= challenge
