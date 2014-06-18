@@ -9,7 +9,7 @@ void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
 
 	produits = _produits;
 
-	evalBestSol = 9999999999999; /* Valeur volontairement grande pour être sûr de trouver mieux */
+	evalBestSol = 999999999; /* Valeur volontairement grande pour être sûr de trouver mieux */
 
     nbBatchsMini = new int[clients.size()];
     nbBatchsUsed = new int[clients.size()];
@@ -78,7 +78,15 @@ Probleme2::Probleme2() {
 	// buildBatchs();
 
 	// initialisation des évaluations
-	evalBestSol = 999999999999;
+	evalBestSol = 99999999;
+
+	nbBatchsMini = new int[clients.size()];
+    nbBatchsUsed = new int[clients.size()];
+
+    for (int i = 0; i < clients.size(); ++i) {
+        nbBatchsUsed[i] = 0;
+        nbBatchsMini[i] = 0;
+    }
 
 	cout << "Initialisation instance de test OK\n";
 }
@@ -91,6 +99,8 @@ Probleme2::~Probleme2() {
 
     delete[] nbBatchsUsed;
     delete[] nbBatchsMini;
+
+	// Tools::viderVectorNoPtr(bestSol);
 }
 
 void Probleme2::printBatchs(vector<Batch*> blist) {
@@ -156,9 +166,9 @@ void Probleme2::solve(){
 
 	//solutionHeuristique();
 
-    vector<Batch> res(0);
+    vector<Batch> res;
     build_batches_bruteforce(res);
-	vector<Batch> curSol(0);
+	vector<Batch> curSol;
     float curEval = 0;
     float curTime = 0;
 
@@ -191,7 +201,7 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
         //cout<<"Produits du client "<<(i+1)<<" :\n";
         //printProduits(prodsClient);
 
-        /* Petit tri pour être sûrs que les produits sont bien ordonnés */
+        // Petit tri pour être sûrs que les produits sont bien ordonnés
         sort(prodsClient.begin(), prodsClient.end(),
          Tools::comparatorProduitPtrDateDue);
 
@@ -211,6 +221,7 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
             std::vector<bool> v(n);
             std::fill(v.begin() + n - r, v.end(), true);
             int j;
+
             do {
                 j = 0;
                 int* ptr = new int[n];
@@ -221,19 +232,21 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                         //std::cout << (i+1) << " ";
                     }
                 }
+
                 //std::cout << "\n";
 
-                /* On vérifie encore l'ordre dans la permutation, pour ne pas avoir des choses
-                 * comme [0,2,1] qui feraient échouer isUseless */
+                // On vérifie encore l'ordre dans la permutation, pour ne pas avoir des choses
+                // comme [0,2,1] qui feraient échouer isUseless
                 Tools::bubbleSort(ptr,r);
 
-                if(!isUseless(ptr,r)){ // C'est QUOI CE PUTAIN DE R ?
+                if(!isUseless(ptr,r)){
                     combinations.push_back(ptr);
-                }
+                } else delete[] ptr; // MOTHERFUCKER pourquoi ça ne marche pas ?
             } while (std::next_permutation(v.begin(), v.end()));
 
-            /* On a toutes les combinaisons sous formes d'indice, maintenant il faut les ajouter aux combinaisons
-             * Des batches. */
+
+            // On a toutes les combinaisons sous formes d'indice, maintenant il faut les ajouter aux combinaisons
+            // Des batches.
 
             //printCombinations(combinations,r);
 
@@ -248,8 +261,9 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                     cur.push_back(temp);
             }
 
-            //printBatchs(cur);
+            // printBatchs(cur);
 
+			Tools::viderVector(combinations);
         }
     }
 
@@ -348,8 +362,8 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
 		Batch tempBatch = *it;
 
         vector<Batch> newSol = curSol;
-
         newSol.push_back(tempBatch);
+
         vector<Batch> newRest = res;
         removeBatchAndDoubles(newRest, tempBatch);
 

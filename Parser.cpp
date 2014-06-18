@@ -83,7 +83,7 @@ void Parser::parseFile(string name){
 
                 data = line.substr(line.find(":"),line.find("\n"));
                 data.erase(data.begin());
-                char* buff = (char *) malloc(sizeof(char)*data.size());
+                char* buff = (char *) malloc(sizeof(char)*(data.size())); // data.size()+1
                 strcpy(buff,data.c_str());
                 char* temp;
 
@@ -109,7 +109,7 @@ void Parser::parseFile(string name){
 			} else if(strcmp(desc.c_str(),"JOB_DUE_DATES") == 0){
                 data = line.substr(line.find(":"),line.find("\n"));
                 data.erase(data.begin());
-                char* buff = (char *) malloc(sizeof(char)*data.size());
+                char* buff = (char *) malloc(sizeof(char)*(data.size())); // data.size()+1
                 strcpy(buff,data.c_str());
                 char* temp;
 
