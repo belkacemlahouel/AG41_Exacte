@@ -407,16 +407,25 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
     // if (curEval+coutMini > evalBestSol)
     //     return;
 
+    /* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
+    if(curSol.size() > 0){
+        if(coutMini+curEval > evalBestSol){
+        // if(curEval > evalBestSol){
+            //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
+            return;
+        }
+    }
+
     /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
     if(res.size() == 0){
                 if(curEval < evalBestSol){
                     cout<<"Meilleure solution trouvee. On l'enregistre.\n";
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
                     bestSol_noptr = curSol;
-                    evalBestSol = curEval;
+                    evalBestSol = curEval+coutMini;
 
                     // A corriger, sinon segfault...
-                    //if (bestSol_noptr.size() > 0)
+                    // if (bestSol_noptr.size() > 0)
                         printBestSol_indo_noptr();
 
                 } else {
@@ -425,14 +434,7 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
             return;
     }
 
-	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
-    if(curSol.size() > 0){
-        if(coutMini+curEval > evalBestSol){
-        // if(curEval > evalBestSol){
-            //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
-            return;
-        }
-    }
+	
 
 	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
     vector<Batch>::iterator it = res.begin();
@@ -460,14 +462,14 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
         float newEval = curEval;
 
         // Comptage des batchs déjà livrés, jusque là
-        int num = newSol[0].getClient()->getNum();
+        int num = newSol[newSol.size()-1].getClient()->getNum();
         ++nbBatchsUsed[num-1];
 
         /* Calcul du temps et des coûts */
         if(newSol.size() == 1){
             newTime = newSol[0].getDateGlobale(); // FAUX ? min(dateDue-retour, dateGlobale-aller/retour) ?... Je sais pas en fait... Ca corresponds à quoi ?
             newEval = newSol[0].coutStockage(newTime);
-            if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
+            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
                 newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
@@ -476,13 +478,15 @@ void Probleme2::solve_bruteforce(vector<Batch> curSol, vector<Batch> res,float c
             if(newTime > newSol[indice].getDateGlobale()){
                 newTime = newSol[indice].getDateGlobale();
             }
-            if (nbBatchsUsed[num-1] >= nbBatchsMini[num-1]) // >= ?
+            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
                 newEval += newSol[indice].getClient()->getDist()*2*eta;
             newEval += newSol[indice].coutStockage(newTime);
             newTime -= newSol[indice].getClient()->getDist();
         }
 
         solve_bruteforce(newSol,newRest,newTime,newEval);
+
+        --nbBatchsUsed[num-1]; // Sûr de ça ?
 
         it++;
     }
