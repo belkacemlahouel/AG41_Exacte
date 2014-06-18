@@ -26,6 +26,7 @@ Probleme2::Probleme2(string filename) {
     init(r.getCapa(), r.getEta(), r.getClients(), r.getProduits());
 }
 
+/* Affiche les produits (jobs) du problème */
 void Probleme2::printProduits(){
 vector<Produit*>::iterator it;
 
@@ -40,6 +41,7 @@ vector<Produit*>::iterator it;
     }
 }
 
+/* Affiche une liste de produits*/
 void Probleme2::printProduits(vector<Produit*> plist){
 vector<Produit*>::iterator it;
 
@@ -156,7 +158,6 @@ void Probleme2::solve(){
 
     vector<Batch> res(0);
     build_batches_bruteforce(res);
-    computeCoutMini();
 	vector<Batch> curSol(0);
     float curEval = 0;
     float curTime = 0;
@@ -168,7 +169,6 @@ void Probleme2::solve(){
      * Il faudra se poser la question de savoir si c'est
      * vraiment plus efficace ou non*/
 
-    computeCoutsStockageCourantsInit(res);
     sort(res.begin(), res.end(),
         // Tools::comparatorBatchLengthDec);                    // Tri 1
         // Tools::comparatorBatchCoutsStockageCourantsDec);     // Tri 2
@@ -176,11 +176,6 @@ void Probleme2::solve(){
         Tools::comparatorCoefSpecial);
 
     solve(curSol, res,curTime, curEval);
-
-    for (int i = 0; i < clients.size(); ++i) {
-        cout << "Nombre de batchs mini pour le client " << clients[i]->getNum();
-        cout << " = " << nbBatchsMini[i] << endl;
-    }
 }
 
 /* Fait tous les batches possibles */
@@ -309,11 +304,6 @@ vector<Produit*> Probleme2::getProdsClient(int num){
 void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
 
 
-    // Ajout d'un cut, avec le cout minimal ; à améliorer
-    // Cout minimal = cout des livraisons seules, en supposant qu'on remplit les batchs au max
-    // if (curEval+coutMini > evalBestSol)
-    //     return;
-
     /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
     if(res.size() == 0){
                 if(curEval < evalBestSol){
@@ -321,10 +311,7 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
                     bestSol = curSol;
                     evalBestSol = curEval;
-
-                    // A corriger, sinon segfault...
-                    //if (bestSol.size() > 0)
-                        printBestSol();
+                    printBestSol();
 
                 } else {
                     //cout<<"Pire solution, on oublie.\n";
@@ -334,8 +321,7 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
 
 	/* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
-        if(coutMini+curEval > evalBestSol){
-        // if(curEval > evalBestSol){
+        if(curEval > evalBestSol){
             //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
             return;
         }
@@ -346,13 +332,15 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
 
 
     // Modifs belka : ajout d'un tri sur les batchs restants
-    // Est-ce que c'est vraiment là qu'on le mets ?...
-    // if (curSol.size() > 0) {
-    //     computeCoutsStockageCourants(res, curTime);
-    //     sort(res.begin(), res.end(),
-    //         Tools::comparatorCoefSpecial);
-    //         // Tools::comparatorBatchCoutStockageCourant);
-    // }
+    // Comparer les temps pour les instances la différence avec/sans tri permanent
+     /*if (curSol.size() == 0) {
+        computeCoutsStockageCourantsInit(res);
+     } else {
+         computeCoutsStockageCourants(res, curTime);
+         sort(res.begin(), res.end(),
+             Tools::comparatorCoefSpecial);
+             // Tools::comparatorBatchCoutStockageCourant);
+     }*/
 
     while(it != res.end()){
 		Batch tempBatch = *it;
@@ -366,33 +354,24 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
         float newTime = curTime;
         float newEval = curEval;
 
-        // Comptage des batchs déjà livrés, jusque là
-        int num = newSol[0].getClient()->getNum();
-        ++nbBatchsUsed[num-1];
-
         /* Calcul du temps et des coûts */
         if(newSol.size() == 1){
-            newTime = newSol[0].getDateGlobale();
+            newTime = newSol[0].dateDueGlobale();
             newEval = newSol[0].coutStockage(newTime);
+            newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
             int indice = newSol.size() - 1;
             newTime -= newSol[indice].getClient()->getDist();
-
-            if(newTime > newSol[indice].getDateGlobale()){ // attente à l'entrepôt
-                newTime = newSol[indice].getDateGlobale();
+            if(newTime > newSol[indice].dateDueGlobale()){
+                newTime = newSol[indice].dateDueGlobale();
             }
-
-            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
-                newEval += newSol[indice].getClient()->getDist()*2*eta;
-
+            newEval += newSol[indice].getClient()->getDist()*2*eta;
             newEval += newSol[indice].coutStockage(newTime);
             newTime -= newSol[indice].getClient()->getDist();
         }
 
         solve(newSol,newRest,newTime,newEval);
-
-        --nbBatchsUsed[num-1];
 
         it++;
     }
