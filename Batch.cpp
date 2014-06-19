@@ -61,23 +61,6 @@ float Batch::coutStockage(float date) {
     return cout_stockage_total;
 }
 
-float Batch::sommeAvancesMin() {
-    int i;
-    int sum = 0;
-    int min = produits[0]->dateDue();
-
-    for (i = 1; i < size(); ++i) {
-        if (min < produits[i]->dateDue())
-            sum += (produits[i]->dateDue() - min);
-        else {
-            sum += (min - produits[i]->dateDue()) * i;
-            min = produits[i]->dateDue();
-        }
-    }
-
-    return sum;
-}
-
 void Batch::printBatch(){
     int j;
     cout << "Batch pour client " << getClient()->getNum() << " :\n";
@@ -86,7 +69,6 @@ void Batch::printBatch(){
 		produits[j]->printProduit();
     }
 
-    cout << "\tSomme des avances   : " << sommeAvancesMin() << "\n";
     cout << "\tCoeff stock. client : " << getClient()->coutUnitaireStockage() << "\n";
     cout << "\tDate de livraison   : " << date_livraison << "/" << dateDueGlobale() << "\n";
 }

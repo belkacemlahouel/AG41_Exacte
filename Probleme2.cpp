@@ -1,5 +1,6 @@
 #include "Probleme2.h"
 
+/* Initialise le problème avec les données collectées par le parser */
 void Probleme2::init(int _capa, float _eta, vector<Client*> _clients,
                          vector<Produit*> _produits) {
 	capa = _capa;
@@ -103,13 +104,7 @@ Probleme2::~Probleme2() {
 	// Tools::viderVectorNoPtr(bestSol);
 }
 
-void Probleme2::printBatchs(vector<Batch*> blist) {
-	int i;
-	for(i = 0; i < blist.size(); ++i) {
-        blist[i]->printBatch();
-	}
-}
-
+/* Affiche une liste de batches */
 void Probleme2::printBatchs(vector<Batch> blist) {
 	int i;
 	for(i = 0; i < blist.size(); ++i) {
@@ -137,6 +132,7 @@ void Probleme2::printBestSol() {
     cout << "______________________________________________________\n";
 }
 
+/* Affiche une solutoin donnée et son évaluation */
 void Probleme2::printSol(vector<Batch> solution,float evalCurSol) {
 	int i;
     cout << "______________________________________________________\n";
@@ -153,14 +149,7 @@ void Probleme2::printSol(vector<Batch> solution,float evalCurSol) {
 // ----------------------- RESOLUTION -----------------------
 // ----------------------------------------------------------
 
-//---------------------------------------
-//          PARTIE INDO
-//---------------------------------------
-
-/* Troisième fonction de résolution, cette fois arbre avec élagage :
- * 	- Livrer un produit
- *	- Si ce produit peut aller avec un batch livré plus tard, le faire
- *	- Sinon, le mettre dans un batch à part. */
+/* Fonction de résolution, arbre avec élagage */
 
 void Probleme2::solve(){
 
@@ -172,12 +161,8 @@ void Probleme2::solve(){
     float curEval = 0;
     float curTime = 0;
 
-    //cout<<"BATCHES SANS TRI : \n";
-    //printBatchs(res);
 
-    /* Tri des batches pour une meilleure efficacité
-     * Il faudra se poser la question de savoir si c'est
-     * vraiment plus efficace ou non*/
+    /* Tri des batches pour une meilleure efficacité */
 
     sort(res.begin(), res.end(),
         // Tools::comparatorBatchLengthDec);                    // Tri 1
@@ -190,7 +175,7 @@ void Probleme2::solve(){
     solve(curSol, res,curTime, curEval);
 }
 
-/* Fait tous les batches possibles */
+/* Fait tous les batches possibles, en prenant compte le fait que certains batches sont inutiles */
 void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
 
     int i;
@@ -231,11 +216,8 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                     if (v[i]) {
                         ptr[j] = i;
                         ++j;
-                        //std::cout << (i+1) << " ";
                     }
                 }
-
-                //std::cout << "\n";
 
                 // On vérifie encore l'ordre dans la permutation, pour ne pas avoir des choses
                 // comme [0,2,1] qui feraient échouer isUseless
@@ -245,7 +227,6 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                     combinations.push_back(ptr);
                 } else delete[] ptr; // MOTHERFUCKER pourquoi ça ne marche pas ?
             } while (std::next_permutation(v.begin(), v.end()));
-
 
             // On a toutes les combinaisons sous formes d'indice, maintenant il faut les ajouter aux combinaisons
             // Des batches.
@@ -263,8 +244,6 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
                     cur.push_back(temp);
             }
 
-            // printBatchs(cur);
-
 			Tools::viderVector(combinations);
         }
     }
@@ -276,7 +255,7 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
 
 /* On peut dire qu'une permutation est inutile si l'écart entre les indices un à un est != 1
  * On peut le dire parce qu'on sait qu'un indice de 3 représente un produit qui arrive
- * plus tard qu'un produit représenté par 1 ou 2. [1,3] est inutile à faire par qu'on sait qu'il
+ * plus tard qu'un produit représenté par 1 ou 2. [1,3] est inutile à faire parce qu'on sait qu'il
  * sera AU MOINS pire que [1,2].
  *
  * IL FAUDRA SECURISER CETTE FONCTION EN FAISANT DES TRIS REGULIERS POUR SAVOIr SI TOUT EST BIEN EN ORDRE*/
@@ -291,6 +270,7 @@ bool Probleme2::isUseless(int* permut, int r){
     return false;
 }
 
+/* Affichage des permutations d'indices*/
 void Probleme2::printCombinations(vector<int*> combs,int r){
 
     int i,j;
@@ -304,8 +284,8 @@ void Probleme2::printCombinations(vector<int*> combs,int r){
     }
 }
 
-/* Récupère tous les produits du client.
- * ATTENTION : les batches sont récupérés dans l'ordre croissant */
+/* Récupère tous les produits du client d'incide num.
+ * Note : les batches sont récupérés dans l'ordre croissant */
 vector<Produit*> Probleme2::getProdsClient(int num){
 
     vector<Produit*> prods;
@@ -358,17 +338,17 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
     // }
     // ----
 
-    /* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
+    /* Il faut évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
-        if(min+curEval > evalBestSol){
         // if (coutMini+curEval > evalBestSol){
         // if(curEval > evalBestSol){
             //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
+        if(min+curEval >= evalBestSol){
             return;
         }
     }
 
-    /* On n'a pas trouvé de truc à inclure : regarde si tous les produits sont bien présents */
+    /* Tous les produits sont inclus dans la solution, on peut donc regarder si elle est meilleure ou non */
     if(res.size() == 0){
                 if(curEval < evalBestSol){
                     cout<<"Meilleure solution trouvee. On l'enregistre.\n";
@@ -385,20 +365,8 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
             return;
     }
 
-	/* Test de toutes les combinaisons de livraison récursivement PAR PRODUITS*/
+	/* Test de toutes les combinaisons de livraison de lots récursivement*/
     vector<Batch>::iterator it = res.begin();
-
-
-    // Modifs belka : ajout d'un tri sur les batchs restants
-    // Comparer les temps pour les instances la différence avec/sans tri permanent
-     /*if (curSol.size() == 0) {
-        computeCoutsStockageCourantsInit(res);
-     } else {
-         computeCoutsStockageCourants(res, curTime);
-         sort(res.begin(), res.end(),
-             Tools::comparatorCoefSpecial);
-             // Tools::comparatorBatchCoutStockageCourant);
-     }*/
 
     while(it != res.end()){
 		Batch tempBatch = *it;
@@ -439,7 +407,7 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
 
         solve(newSol,newRest,newTime,newEval);
 
-        --nbBatchsUsed[num-1]; // Sûr de ça ?
+        --nbBatchsUsed[num-1];
 
         it++;
     }
@@ -450,9 +418,7 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
 }
 
 /* Solution heuristique. Algo :
- * - créer les batch comme d'habitude. Si un batch se voit livré plus tôt que sa date due, reprendre les batchs aux alentours
- *          (avant ou après ??)
- * - et voir s'il est possible de le scinder (envoyer un bout avant  pour que le nouveau batch soit plus optimal*/
+ * - créer les batch comme d'habitude. Si un batch se voit livré plus tôt que sa date due, reprendre les batchs aux alentours*/
 
 void Probleme2::heuristique(){
 
@@ -506,12 +472,13 @@ void Probleme2::build_batches(vector<Batch> &cur, vector<Produit*> res){
     build_batches(cur, res);
 }
 
+/* Après avoir construit des lots de façon heuristique, on teste leurs permutations pour trouver une solution viable */
 void Probleme2::heuristique(vector<Batch> curSol, vector<Batch> resBatches,float curEval){
 
     if(resBatches.size() == 0){
         curEval = evaluerSolution_auto(curSol);
-        printBatchs(curSol);
-        printSol(curSol,curEval);
+        //printBatchs(curSol);
+        //printSol(curSol,curEval);
 
         if(curEval < evalBestSol){
             cout<<"Meilleure solution trouvee. On l'enregistre.\n";
@@ -519,7 +486,7 @@ void Probleme2::heuristique(vector<Batch> curSol, vector<Batch> resBatches,float
             bestSol = curSol;
             evalBestSol = curEval;
         } else {
-            cout<<"Pire solution, on oublie.\n";
+            //cout<<"Pire solution, on oublie.\n";
         }
 
         return;
@@ -528,7 +495,7 @@ void Probleme2::heuristique(vector<Batch> curSol, vector<Batch> resBatches,float
     if(curSol.size() > 0){
         curEval = evaluerSolution_auto(curSol);
         if(curEval > evalBestSol){
-            cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
+            //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
             return;
         }
     }
@@ -544,14 +511,7 @@ void Probleme2::heuristique(vector<Batch> curSol, vector<Batch> resBatches,float
         newSol.push_back(temp);
         vector<Batch> newRest = resBatches;
 
-        cout<<"Avant remove :\n";
-        printBatchs(newRest);
-
         removeBatch(newRest,temp);
-
-
-        cout<<"\nApres remove :\n";
-        printBatchs(newRest);
 
         heuristique(newSol,newRest,curEval);
         ++it;
@@ -588,7 +548,7 @@ void Probleme2::removeBatchAndDoubles(vector<Batch> &newRest,Batch temp){
         }
     }
 
-    /* Seconde étatpe : on supprime les batches contenant  un ou plusieurs produits
+    /* Seconde étape : on supprime les batches contenant  un ou plusieurs produits
        similaires avec temp */
 
     it = newRest.begin();
@@ -644,12 +604,10 @@ Produit* Probleme2::produitDueMax(vector<Produit* > plist){
 
 /* Contrairement à evaluerSolution, cette fonction va évaluer la solution donnée en reconstruisant
    lui même la timeline de livraison à partir d'une liste de batch. Elle n'a donc pas besoin de dateCourante
-   /!\ CONTRAIREMENT A EVALUERSOLUTION, CETTE EVALUATION SE FAIT EN BACKTRACK /!\ */
+   /!\ CETTE EVALUATION SE FAIT EN BACKTRACK /!\ */
 float Probleme2::evaluerSolution_auto(vector<Batch> s) {
 
     float curTime = 0;
-    cout << "Evaluation solution"<<endl;
-    cout << "Detail de la solution :\n";
 
     float ev = 0;
     /* La date de départ est la date de livraison du dernier batch + le temps de retour a l'entrepôt */
@@ -673,6 +631,7 @@ float Probleme2::evaluerSolution_auto(vector<Batch> s) {
     return ev;
 }
 
+/* Prend la meilleure solution, et reconstitue en backtrack les dates de livraison */
 void Probleme2::setDates_livraison_bestSol(){
     vector<Batch> &tempBestSol = bestSol;
     reverse(tempBestSol.begin(),tempBestSol.end());
@@ -715,7 +674,6 @@ void Probleme2::computeCoutMini() {
 
         i += j;
     }
-    // coutMini = coutMini/3;
 }
 
 void Probleme2::computeCoutsStockageCourants(vector<Batch> reste, float date) {

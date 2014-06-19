@@ -31,7 +31,6 @@ class Batch{
         Client* getClient();
 
         float coutStockage(float date);
-        float sommeAvancesMin();
 
         void setDate_livraison(float date);
         float getDate_livraison();
