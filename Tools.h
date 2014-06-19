@@ -18,12 +18,6 @@ class Tools {
 			}
 		};
 
-		// template<class T> static void viderVectorNoPtr(vector<T> vect) {
-		//	while (vect.size() > 0) {
-		//		vect.erase(vect.begin());
-		//	}
-		// };
-
 		// Fonctions statiques de comparaison
 		static bool comparatorProduitPtrDateDue(Produit* p1, Produit* p2) {
 			// cout << "produitptr comparator" << endl;
