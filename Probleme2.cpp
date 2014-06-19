@@ -185,6 +185,8 @@ void Probleme2::solve(){
         // Tools::comparatorBatchLengthDecDateDueGlobaleDec);   // Tri 3
         Tools::comparatorCoefSpecial);
 
+    // computeCoutMini();
+
     solve(curSol, res,curTime, curEval);
 }
 
@@ -319,10 +321,47 @@ vector<Produit*> Probleme2::getProdsClient(int num){
 
 void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,float curEval){
 
+    // ----
+    vector<int> tmp; // Liste des numéros des produits déjà livrés
+    for (int i = 0; i < curSol.size(); ++i) {
+        for (int j = 0; j < curSol[i].size(); ++j) {
+            tmp.push_back(curSol[i].getProduits()[j]->getNum());
+        }
+    }
+    // Nous avons alors la liste des numéros de produits déjà livrés
+
+    // Nous cherchons le coût minimum sur les batchs restants à livrer
+    float min = 0;
+    sort(res.begin(), res.end(), Tools::comparatorBatchLengthDec);
+    for (int i = 0; i < res.size(); ++i) {
+        bool cont = true; // Vérifier que tous les produits du batch sont différents
+        for (int j = 0; j < res[i].size() && cont; ++j) {
+            if (Tools::contains(tmp, res[i].getProduits()[j]->getNum())) {
+                cont = false;
+            }
+        }
+
+        if (cont) {
+            // Calcul du coût de la livraison de ce batch
+            min += res[i].getClient()->getDist()*2*eta;
+            // Ajout de tous ces produits au vecteur des produits déjà livrés
+            for (int j = 0; j < res[i].size(); ++j) {
+                tmp.push_back(res[i].getProduits()[j]->getNum());
+            }
+        }
+    }
+
+    // if (curSol.size() == 0) {
+    //     cout << "Min = " << min << endl;
+    //     cout << "coutMini = " << coutMini << endl;
+    //     return;
+    // }
+    // ----
 
     /* Il faut aussi évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
-        if(coutMini+curEval > evalBestSol){
+        if(min+curEval > evalBestSol){
+        // if (coutMini+curEval > evalBestSol){
         // if(curEval > evalBestSol){
             //cout<<"Solution plus mauvaise : cut.\n\n"<<endl;
             return;
@@ -336,7 +375,8 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
                     reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
 
                     bestSol = curSol;
-                    evalBestSol = curEval+coutMini;
+                    // evalBestSol = curEval+coutMini;
+                    evalBestSol = curEval;
                     printBestSol();
 
                 } else {
@@ -380,7 +420,7 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
         if(newSol.size() == 1){
             newTime = newSol[0].dateDueGlobale();
             newEval = newSol[0].coutStockage(newTime);
-            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
+            // if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
                 newEval += newSol[0].getClient()->getDist()*2*eta;
             newTime -= newSol[0].getClient()->getDist();
         } else {
@@ -390,7 +430,7 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
                 newTime = newSol[indice].dateDueGlobale();
             }
 
-            if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
+            // if (nbBatchsUsed[num-1] > nbBatchsMini[num-1]) // >= ?
                 newEval += newSol[indice].getClient()->getDist()*2*eta;
 
             newEval += newSol[indice].coutStockage(newTime);
@@ -403,6 +443,10 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
 
         it++;
     }
+
+    // -----
+    Tools::viderVectorNoPtr(tmp);
+    // -----
 }
 
 /* Solution heuristique. Algo :
