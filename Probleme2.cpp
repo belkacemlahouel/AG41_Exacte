@@ -253,7 +253,9 @@ void Probleme2::build_batches_bruteforce(vector<Batch> &cur){
         }
     }
 
+    //printBatchs(cur);
     cout<<"Recherche terminee.\n";
+    cout<<"Nombre de batches trouves : "<<cur.size()<<endl;
 }
 
 /* On peut dire qu'une permutation est inutile si l'écart entre les indices un à un est != 1
