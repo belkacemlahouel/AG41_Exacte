@@ -9,8 +9,8 @@ int main(int argc, char** argv) {
     if (argc == 2) {
         p = new Probleme2(argv[1]);
     } else {
-        p = new Probleme2("instances/instance10n3cl.txt");
-        //p = new Probleme2();
+        //p = new Probleme2("instances-soutenances/instance30n2cl.txt");
+        p = new Probleme2();
     }
 
     // Initialisation du chrono
