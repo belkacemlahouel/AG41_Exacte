@@ -164,11 +164,11 @@ void Probleme2::solve(){
 
     /* Tri des batches pour une meilleure efficacité */
 
-    sort(res.begin(), res.end(),
+    // sort(res.begin(), res.end(),
         // Tools::comparatorBatchLengthDec);                    // Tri 1
         // Tools::comparatorBatchCoutsStockageCourantsDec);     // Tri 2
         // Tools::comparatorBatchLengthDecDateDueGlobaleDec);   // Tri 3
-        Tools::comparatorCoefSpecial);
+        // Tools::comparatorCoefSpecial);
 
     // computeCoutMini();
 
@@ -337,6 +337,14 @@ void Probleme2::solve(vector<Batch> curSol, vector<Batch> res,float curTime,floa
     //     return;
     // }
     // ----
+
+	// ----
+	sort(res.begin(), res.end(),
+        // Tools::comparatorBatchLengthDec);                    // Tri 1
+        // Tools::comparatorBatchCoutsStockageCourantsDec);     // Tri 2
+        // Tools::comparatorBatchLengthDecDateDueGlobaleDec);   // Tri 3
+        Tools::comparatorCoefSpecial);
+	// ----
 
     /* Il faut évaluer la solution à chaque tour, pour voir si on peut cut ou pas */
     if(curSol.size() > 0){
