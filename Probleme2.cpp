@@ -485,6 +485,7 @@ void Probleme2::heuristique(vector<Batch> curSol, vector<Batch> resBatches,float
             reverse(curSol.begin(), curSol.end()); // on inverse avant de rendre la meilleure solution, puisqu'elle était inversée
             bestSol = curSol;
             evalBestSol = curEval;
+            printBestSol();
         } else {
             //cout<<"Pire solution, on oublie.\n";
         }
